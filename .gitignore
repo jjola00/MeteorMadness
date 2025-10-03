@@ -1,3 +1,86 @@
+# Environment and Configuration
 .env
+.env.local
+.env.*.local
+
+# Project Documentation (if contains sensitive info)
 ProjectRequirements.txt
+
+# Python Virtual Environments
 /venv
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Python Cache and Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and Databases
+*.log
+*.sqlite3
+*.db
+
+# API Keys and Secrets (backup patterns)
+**/secrets.json
+**/config/local.json
+**/*_secret*
+**/*_key*
+
+# Temporary Files
+*.tmp
+*.temp
+.cache/
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
