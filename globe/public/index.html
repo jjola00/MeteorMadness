@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Globe - MeteorMadness</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <div id="container">
+        <div id="info">
+            <h2>🌍 The Earth</h2>
+            <p>✨ Fully illuminated globe</p>
+        </div>
+        
+        <div id="controls">
+            <div class="control-item">🖱️ <strong>Mouse:</strong> Rotate globe</div>
+            <div class="control-item">🎯 <strong>Scroll:</strong> Zoom in/out</div>
+            <div class="control-item">🔄 <strong>Auto-rotate:</strong> Enabled</div>
+            <div class="control-item">☄️ <strong>Space:</strong> Spawn asteroid</div>
+            <div class="control-item">🗑️ <strong>C:</strong> Clear asteroids</div>
+        </div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="src/js/scene.js"></script>
+    <script src="src/js/globe.js"></script>
+    <script src="src/js/lighting.js"></script>
+    <script src="src/js/controls.js"></script>
+    <script src="src/js/app.js"></script>
+</body>
+</html>
