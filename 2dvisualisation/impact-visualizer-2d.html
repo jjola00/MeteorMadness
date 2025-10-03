@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Impact 2D Visualizer</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        #map {
+            flex: 1;
+            height: 100vh;
+        }
+
+        .controls-panel {
+            width: 350px;
+            background: #2a2a2a;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #444;
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+        }
+
+        .panel-section h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .layer-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #333;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .layer-control:hover {
+            background: #3a3a3a;
+        }
+
+        .layer-control input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .layer-control label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            border: 2px solid #555;
+        }
+
+        .scenario-selector {
+            margin-bottom: 20px;
+        }
+
+        .scenario-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .scenario-btn:hover {
+            background: #555;
+        }
+
+        .scenario-btn.active {
+            background: #ff6b35;
+        }
+
+        .info-panel {
+            background: #333;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .info-panel h4 {
+            color: #ff6b35;
+            margin-bottom: 8px;
+        }
+
+        .legend {
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        /* Custom Leaflet popup styling */
+        .leaflet-popup-content-wrapper {
+            background: #2a2a2a;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .leaflet-popup-content {
+            margin: 12px;
+            font-size: 13px;
+        }
+
+        .leaflet-popup-tip {
+            background: #2a2a2a;
+        }
+
+        /* Timeline Controller Styles */
+        .timeline-section {
+            margin-bottom: 25px;
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 40px;
+            background: linear-gradient(90deg, #444 0%, #666 50%, #444 100%);
+            border-radius: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #ff8c42);
+            border-radius: 20px;
+            width: 0%;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+        }
+
+        .timeline-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 2px solid #ff6b35;
+        }
+
+        .timeline-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            gap: 8px;
+        }
+
+        .timeline-btn {
+            background: #ff6b35;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .timeline-btn:hover {
+            background: #ff8c42;
+            transform: translateY(-1px);
+        }
+
+        .timeline-btn.secondary {
+            background: #666;
+        }
+
+        .timeline-btn.secondary:hover {
+            background: #777;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            height: 4px;
+            background: #555;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ff6b35;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .current-time {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timeline-markers {
+            position: relative;
+            height: 20px;
+            margin: 8px 0;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #ff6b35;
+            transform: translateX(-0.5px);
+        }
+
+        .timeline-marker::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: #ff6b35;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* Real-time data panel styles */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .data-label {
+            font-size: 11px;
+            color: #cccccc;
+            font-weight: 500;
+        }
+
+        .data-value {
+            font-size: 11px;
+            color: #ff6b35;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .data-value.critical {
+            color: #ff0000;
+            animation: pulse-red 1s ease-in-out infinite;
+        }
+
+        .data-value.warning {
+            color: #ffa500;
+        }
+
+        .data-value.good {
+            color: #90ee90;
+        }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="map"></div>
+
+        <div class="controls-panel">
+            <div class="panel-section">
+                <h3>Timeline Control</h3>
+                <div class="timeline-section">
+                    <div class="current-time" id="currentTime">T+0:00:00</div>
+
+                    <div class="timeline-track">
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                        <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0"
+                            step="0.1">
+                    </div>
+
+                    <div class="timeline-markers" id="timelineMarkers"></div>
+
+                    <div class="timeline-controls">
+                        <button class="timeline-btn secondary" id="resetBtn">Reset</button>
+                        <button class="timeline-btn" id="playPauseBtn">Play</button>
+                        <button class="timeline-btn secondary" id="stepBtn">Step</button>
+                    </div>
+
+                    <div class="speed-control">
+                        <span>Speed:</span>
+                        <input type="range" class="speed-slider" id="speedSlider" min="0.1" max="5" value="1"
+                            step="0.1">
+                        <span id="speedDisplay">1.0x</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Scenarios</h3>
+                <div class="scenario-selector">
+                    <button class="scenario-btn active" onclick="loadScenarioWrapper('tunguska', this)">Tunguska Event
+                        (1908)</button>
+                    <button class="scenario-btn" onclick="loadScenarioWrapper('chelyabinsk', this)">Chelyabinsk
+                        (2013)</button>
+                    <button class="scenario-btn" onclick="loadScenarioWrapper('chicxulub', this)">Chicxulub
+                        Impact</button>
+                    <button class="scenario-btn" onclick="loadScenarioWrapper('hypothetical', this)">NYC
+                        Hypothetical</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Damage Layers</h3>
+                <div class="layer-control">
+                    <input type="checkbox" id="blast-layer" checked onchange="toggleLayer('blast')">
+                    <label for="blast-layer">Blast Zones</label>
+                    <div class="color-indicator" style="background: rgba(255, 0, 0, 0.6);"></div>
+                </div>
+                <div class="layer-control">
+                    <input type="checkbox" id="seismic-layer" checked onchange="toggleLayer('seismic')">
+                    <label for="seismic-layer">Seismic Effects</label>
+                    <div class="color-indicator" style="background: rgba(255, 165, 0, 0.6);"></div>
+                </div>
+                <div class="layer-control">
+                    <input type="checkbox" id="thermal-layer" checked onchange="toggleLayer('thermal')">
+                    <label for="thermal-layer">Thermal Effects</label>
+                    <div class="color-indicator" style="background: rgba(255, 255, 0, 0.6);"></div>
+                </div>
+                <div class="layer-control">
+                    <input type="checkbox" id="population-layer" onchange="toggleLayer('population')">
+                    <label for="population-layer">Population Density</label>
+                    <div class="color-indicator" style="background: rgba(0, 255, 255, 0.4);"></div>
+                </div>
+                <div class="layer-control">
+                    <input type="checkbox" id="crater-layer" checked onchange="toggleLayer('crater')">
+                    <label for="crater-layer">Impact Crater</label>
+                    <div class="color-indicator" style="background: rgba(139, 69, 19, 0.8);"></div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="info-panel">
+                    <h4>Current Scenario</h4>
+                    <div id="scenario-info">
+                        <p><strong>Event:</strong> <span id="event-name">Tunguska Event</span></p>
+                        <p><strong>Energy:</strong> <span id="event-energy">15 MT TNT</span></p>
+                        <p><strong>Casualties:</strong> <span id="event-casualties">0 (remote area)</span></p>
+                        <p><strong>Crater:</strong> <span id="event-crater">No crater (airburst)</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="info-panel">
+                    <h4>Real-Time Impact Data</h4>
+                    <div id="realtime-data">
+                        <div class="data-row">
+                            <span class="data-label">Richter Scale:</span>
+                            <span class="data-value" id="richter-value">0.0</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Casualties:</span>
+                            <span class="data-value" id="casualties-value">0</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Air Quality Index:</span>
+                            <span class="data-value" id="aqi-value">Good (50)</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Temperature Rise:</span>
+                            <span class="data-value" id="temp-value">+0°C</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Radiation Level:</span>
+                            <span class="data-value" id="radiation-value">Normal</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Wind Speed:</span>
+                            <span class="data-value" id="wind-value">0 km/h</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Debris Cloud:</span>
+                            <span class="data-value" id="debris-value">None</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Infrastructure:</span>
+                            <span class="data-value" id="infrastructure-value">100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="legend">
+                    <h3>Intensity Scale</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff0000;"></div>
+                        <span>Total Destruction</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff4500;"></div>
+                        <span>Severe Damage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffa500;"></div>
+                        <span>Moderate Damage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffff00;"></div>
+                        <span>Light Damage</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #90ee90;"></div>
+                        <span>Minimal Effects</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Global variables
+        let map;
+        let layerGroups = {
+            blast: L.layerGroup(),
+            seismic: L.layerGroup(),
+            thermal: L.layerGroup(),
+            population: L.layerGroup(),
+            crater: L.layerGroup()
+        };
+        let currentScenario = 'tunguska';
+
+        // Timeline controller variables
+        let timelineController = {
+            currentTime: 0,
+            duration: 86400 * 3, // 3 days default
+            isPlaying: false,
+            playbackSpeed: 1.0,
+            animationId: null,
+            lastUpdateTime: 0
+        };
+
+        // Sample impact scenarios with pre-calculated data
+        const impactScenarios = {
+            tunguska: {
+                name: "Tunguska Event (1908)",
+                location: [60.8858, 101.8944], // Tunguska, Russia
+                energy: "15 MT TNT",
+                casualties: "0 (remote area)",
+                crater: "No crater (airburst)",
+                duration: 86400 * 3, // 3 days
+                markers: [
+                    { time: 0, label: "Impact", phase: "Impact" },
+                    { time: 300, label: "Peak Blast", phase: "Blast Wave" },
+                    { time: 3600, label: "Fire Spread", phase: "Secondary Effects" },
+                    { time: 86400, label: "Day 1", phase: "Assessment" },
+                    { time: 259200, label: "Day 3", phase: "Recovery" }
+                ],
+                temporalEffects: {
+                    blastRadius: [0, 15, 30, 30, 25],
+                    seismicIntensity: [0, 5.0, 3.2, 1.5, 0.8],
+                    thermalRadius: [0, 8, 12, 10, 8],
+                    casualties: [0, 0, 0, 0, 0], // Remote area
+                    airQuality: [50, 150, 300, 200, 100], // AQI values
+                    temperatureRise: [0, 15, 25, 20, 10], // Celsius
+                    radiationLevel: [0, 0, 0, 0, 0], // No radiation from impact
+                    windSpeed: [0, 80, 120, 60, 20], // km/h from blast
+                    debrisCloud: [0, 0.5, 1.0, 0.8, 0.3], // Coverage factor
+                    infrastructureDamage: [0, 0, 0, 0, 0] // % damage (remote area)
+                },
+                impactData: {
+                    blast: [
+                        { center: [60.8858, 101.8944], radius: 15000, intensity: 1.0, description: "Total forest destruction" },
+                        { center: [60.8858, 101.8944], radius: 30000, intensity: 0.7, description: "Severe tree damage" },
+                        { center: [60.8858, 101.8944], radius: 50000, intensity: 0.4, description: "Moderate damage" }
+                    ],
+                    seismic: [
+                        { center: [60.8858, 101.8944], radius: 100000, intensity: 0.8, description: "Strong seismic waves" },
+                        { center: [60.8858, 101.8944], radius: 200000, intensity: 0.5, description: "Moderate tremors" },
+                        { center: [60.8858, 101.8944], radius: 500000, intensity: 0.2, description: "Detectable tremors" }
+                    ],
+                    thermal: [
+                        { center: [60.8858, 101.8944], radius: 20000, intensity: 0.9, description: "Intense heat flash" },
+                        { center: [60.8858, 101.8944], radius: 40000, intensity: 0.6, description: "Significant thermal effects" },
+                        { center: [60.8858, 101.8944], radius: 80000, intensity: 0.3, description: "Mild thermal effects" }
+                    ],
+                    population: [
+                        { bounds: [[60.5, 101.5], [61.2, 102.3]], density: 0.1, description: "Sparse population" }
+                    ],
+                    crater: null // No crater for airburst
+                }
+            },
+            chelyabinsk: {
+                name: "Chelyabinsk Meteor (2013)",
+                location: [55.1540, 61.4291], // Chelyabinsk, Russia
+                energy: "500 KT TNT",
+                casualties: "~1,500 injured",
+                crater: "No crater (airburst)",
+                duration: 86400 * 2, // 2 days
+                markers: [
+                    { time: 0, label: "Airburst", phase: "Airburst" },
+                    { time: 60, label: "Shockwave", phase: "Shockwave" },
+                    { time: 1800, label: "Damage Assessment", phase: "Assessment" },
+                    { time: 86400, label: "Day 1", phase: "Recovery" },
+                    { time: 172800, label: "Day 2", phase: "Cleanup" }
+                ],
+                temporalEffects: {
+                    blastRadius: [0, 8, 12, 10, 8],
+                    seismicIntensity: [0, 2.7, 1.8, 0.5, 0.2],
+                    thermalRadius: [0, 5, 8, 6, 4],
+                    casualties: [0, 500, 1500, 1200, 800],
+                    airQuality: [50, 200, 400, 300, 150],
+                    temperatureRise: [0, 8, 12, 8, 4],
+                    radiationLevel: [0, 0, 0, 0, 0],
+                    windSpeed: [0, 60, 100, 40, 15],
+                    debrisCloud: [0, 0.3, 0.7, 0.5, 0.2],
+                    infrastructureDamage: [0, 15, 35, 25, 10]
+                },
+                impactData: {
+                    blast: [
+                        { center: [55.1540, 61.4291], radius: 5000, intensity: 0.8, description: "Window damage zone" },
+                        { center: [55.1540, 61.4291], radius: 15000, intensity: 0.5, description: "Minor structural damage" },
+                        { center: [55.1540, 61.4291], radius: 30000, intensity: 0.2, description: "Light damage" }
+                    ],
+                    seismic: [
+                        { center: [55.1540, 61.4291], radius: 50000, intensity: 0.6, description: "Detectable tremors" },
+                        { center: [55.1540, 61.4291], radius: 100000, intensity: 0.3, description: "Weak tremors" }
+                    ],
+                    thermal: [
+                        { center: [55.1540, 61.4291], radius: 10000, intensity: 0.7, description: "Bright flash effects" },
+                        { center: [55.1540, 61.4291], radius: 25000, intensity: 0.4, description: "Visible thermal effects" }
+                    ],
+                    population: [
+                        { bounds: [[55.0, 61.2], [55.3, 61.7]], density: 0.8, description: "Urban area" },
+                        { bounds: [[54.8, 61.0], [55.5, 62.0]], density: 0.4, description: "Suburban area" }
+                    ],
+                    crater: null
+                }
+            },
+            chicxulub: {
+                name: "Chicxulub Impact (66 MYA)",
+                location: [21.4, -89.5], // Yucatan Peninsula
+                energy: "100 TT TNT",
+                casualties: "Mass extinction event",
+                crater: "180 km diameter",
+                duration: 86400 * 365, // 1 year
+                markers: [
+                    { time: 0, label: "Impact", phase: "Impact" },
+                    { time: 3600, label: "Global Shockwave", phase: "Global Effects" },
+                    { time: 86400, label: "Nuclear Winter Begins", phase: "Climate Change" },
+                    { time: 2592000, label: "Month 1", phase: "Mass Extinction" },
+                    { time: 15552000, label: "Month 6", phase: "Ecosystem Collapse" },
+                    { time: 31536000, label: "Year 1", phase: "Recovery Begins" }
+                ],
+                temporalEffects: {
+                    blastRadius: [0, 1000, 2000, 1800, 1500, 1200],
+                    seismicIntensity: [0, 11.0, 8.5, 6.0, 4.0, 2.0],
+                    thermalRadius: [0, 2000, 3000, 2500, 2000, 1500],
+                    casualties: [0, 500000000, 2000000000, 4000000000, 6000000000, 7000000000],
+                    airQuality: [50, 500, 999, 800, 600, 400],
+                    temperatureRise: [0, 100, 200, 150, 100, 50],
+                    radiationLevel: [0, 2, 5, 4, 3, 1], // Elevated from debris
+                    windSpeed: [0, 500, 800, 400, 200, 100],
+                    debrisCloud: [0, 1.0, 1.0, 0.9, 0.7, 0.5],
+                    infrastructureDamage: [0, 80, 95, 90, 85, 70]
+                },
+                impactData: {
+                    blast: [
+                        { center: [21.4, -89.5], radius: 500000, intensity: 1.0, description: "Complete devastation" },
+                        { center: [21.4, -89.5], radius: 1000000, intensity: 0.8, description: "Severe destruction" },
+                        { center: [21.4, -89.5], radius: 2000000, intensity: 0.6, description: "Major damage" }
+                    ],
+                    seismic: [
+                        { center: [21.4, -89.5], radius: 3000000, intensity: 0.9, description: "Magnitude 10+ earthquake" },
+                        { center: [21.4, -89.5], radius: 5000000, intensity: 0.7, description: "Severe seismic activity" }
+                    ],
+                    thermal: [
+                        { center: [21.4, -89.5], radius: 1500000, intensity: 1.0, description: "Global thermal pulse" },
+                        { center: [21.4, -89.5], radius: 3000000, intensity: 0.8, description: "Intense heat" }
+                    ],
+                    population: [
+                        { bounds: [[20.0, -91.0], [23.0, -88.0]], density: 0.0, description: "No human population (66 MYA)" }
+                    ],
+                    crater: { center: [21.4, -89.5], radius: 90000, description: "180 km diameter crater" }
+                }
+            },
+            hypothetical: {
+                name: "NYC Hypothetical Impact",
+                location: [40.7128, -74.0060], // New York City
+                energy: "50 MT TNT",
+                casualties: "~8 million at risk",
+                crater: "2 km diameter",
+                duration: 86400 * 7, // 7 days
+                markers: [
+                    { time: 0, label: "Impact", phase: "Impact" },
+                    { time: 600, label: "Peak Effects", phase: "Peak Damage" },
+                    { time: 3600, label: "Hour 1", phase: "Immediate Response" },
+                    { time: 86400, label: "Day 1", phase: "Assessment" },
+                    { time: 259200, label: "Day 3", phase: "Recovery" },
+                    { time: 604800, label: "Week 1", phase: "Reconstruction" }
+                ],
+                temporalEffects: {
+                    blastRadius: [0, 50, 75, 70, 60, 50],
+                    seismicIntensity: [0, 7.2, 5.8, 4.1, 2.5, 1.2],
+                    thermalRadius: [0, 30, 45, 40, 35, 30],
+                    casualties: [0, 2000000, 5000000, 4500000, 3000000, 2000000],
+                    airQuality: [50, 300, 500, 400, 250, 150],
+                    temperatureRise: [0, 30, 50, 40, 25, 15],
+                    radiationLevel: [0, 1, 2, 1.5, 1, 0.5],
+                    windSpeed: [0, 150, 250, 120, 80, 40],
+                    debrisCloud: [0, 0.8, 1.0, 0.9, 0.6, 0.3],
+                    infrastructureDamage: [0, 60, 85, 75, 50, 30]
+                },
+                impactData: {
+                    blast: [
+                        { center: [40.7128, -74.0060], radius: 10000, intensity: 1.0, description: "Total destruction" },
+                        { center: [40.7128, -74.0060], radius: 25000, intensity: 0.8, description: "Severe damage" },
+                        { center: [40.7128, -74.0060], radius: 50000, intensity: 0.6, description: "Moderate damage" },
+                        { center: [40.7128, -74.0060], radius: 100000, intensity: 0.3, description: "Light damage" }
+                    ],
+                    seismic: [
+                        { center: [40.7128, -74.0060], radius: 150000, intensity: 0.9, description: "Severe earthquake" },
+                        { center: [40.7128, -74.0060], radius: 300000, intensity: 0.6, description: "Strong tremors" },
+                        { center: [40.7128, -74.0060], radius: 500000, intensity: 0.3, description: "Moderate tremors" }
+                    ],
+                    thermal: [
+                        { center: [40.7128, -74.0060], radius: 30000, intensity: 1.0, description: "Lethal thermal radiation" },
+                        { center: [40.7128, -74.0060], radius: 60000, intensity: 0.7, description: "Severe burns" },
+                        { center: [40.7128, -74.0060], radius: 120000, intensity: 0.4, description: "Thermal effects" }
+                    ],
+                    population: [
+                        { bounds: [[40.4774, -74.2591], [40.9176, -73.7004]], density: 1.0, description: "Dense urban population" },
+                        { bounds: [[40.2, -74.5], [41.2, -73.5]], density: 0.6, description: "Metropolitan area" }
+                    ],
+                    crater: { center: [40.7128, -74.0060], radius: 1000, description: "2 km diameter crater" }
+                }
+            }
+        };
+
+        // Initialize the map
+        function initMap() {
+            map = L.map('map').setView([60.8858, 101.8944], 6);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Add all layer groups to map
+            Object.values(layerGroups).forEach(layerGroup => {
+                layerGroup.addTo(map);
+            });
+
+            // Load initial scenario
+            setTimeout(() => {
+                loadScenario('tunguska');
+            }, 100);
+        }
+
+        // Get color based on intensity and effect type
+        function getEffectColor(effectType, intensity) {
+            const colors = {
+                blast: {
+                    1.0: '#ff0000',
+                    0.8: '#ff4500',
+                    0.6: '#ffa500',
+                    0.4: '#ffff00',
+                    0.2: '#90ee90'
+                },
+                seismic: {
+                    1.0: '#8b0000',
+                    0.8: '#ff4500',
+                    0.6: '#ffa500',
+                    0.4: '#ffff00',
+                    0.2: '#90ee90'
+                },
+                thermal: {
+                    1.0: '#ffff00',
+                    0.8: '#ffd700',
+                    0.6: '#ffa500',
+                    0.4: '#ff6347',
+                    0.2: '#90ee90'
+                }
+            };
+
+            const colorMap = colors[effectType] || colors.blast;
+
+            // Find closest intensity match
+            const intensities = Object.keys(colorMap).map(Number).sort((a, b) => b - a);
+            for (let i of intensities) {
+                if (intensity >= i) {
+                    return colorMap[i];
+                }
+            }
+            return colorMap[intensities[intensities.length - 1]];
+        }
+
+        // Render impact visualization with given data
+        function renderImpactVisualization(impactData) {
+            // Clear existing layers
+            Object.values(layerGroups).forEach(layerGroup => {
+                layerGroup.clearLayers();
+            });
+
+            // Render blast zones
+            if (impactData.blast) {
+                impactData.blast.forEach(zone => {
+                    const circle = L.circle(zone.center, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('blast', zone.intensity),
+                        color: getEffectColor('blast', zone.intensity),
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.4
+                    }).bindPopup(`
+                        <strong>Blast Zone</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Intensity: ${(zone.intensity * 100).toFixed(0)}%<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.blast.addLayer(circle);
+                });
+            }
+
+            // Render seismic effects
+            if (impactData.seismic) {
+                impactData.seismic.forEach(zone => {
+                    const circle = L.circle(zone.center, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('seismic', zone.intensity),
+                        color: getEffectColor('seismic', zone.intensity),
+                        weight: 2,
+                        opacity: 0.6,
+                        fillOpacity: 0.3
+                    }).bindPopup(`
+                        <strong>Seismic Effects</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Intensity: ${(zone.intensity * 100).toFixed(0)}%<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.seismic.addLayer(circle);
+                });
+            }
+
+            // Render thermal effects
+            if (impactData.thermal) {
+                impactData.thermal.forEach(zone => {
+                    const circle = L.circle(zone.center, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('thermal', zone.intensity),
+                        color: getEffectColor('thermal', zone.intensity),
+                        weight: 2,
+                        opacity: 0.7,
+                        fillOpacity: 0.3
+                    }).bindPopup(`
+                        <strong>Thermal Effects</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Intensity: ${(zone.intensity * 100).toFixed(0)}%<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.thermal.addLayer(circle);
+                });
+            }
+
+            // Render population density
+            if (impactData.population) {
+                impactData.population.forEach(area => {
+                    const opacity = area.density * 0.5;
+                    const rectangle = L.rectangle(area.bounds, {
+                        fillColor: '#00ffff',
+                        color: '#00ffff',
+                        weight: 1,
+                        opacity: opacity,
+                        fillOpacity: opacity * 0.5
+                    }).bindPopup(`
+                        <strong>Population Density</strong><br>
+                        Density: ${(area.density * 100).toFixed(0)}%<br>
+                        ${area.description}
+                    `);
+                    layerGroups.population.addLayer(rectangle);
+                });
+            }
+
+            // Render crater
+            if (impactData.crater) {
+                const crater = L.circle(impactData.crater.center, {
+                    radius: impactData.crater.radius,
+                    fillColor: '#8b4513',
+                    color: '#654321',
+                    weight: 3,
+                    opacity: 1.0,
+                    fillOpacity: 0.8
+                }).bindPopup(`
+                    <strong>Impact Crater</strong><br>
+                    ${impactData.crater.description}
+                `);
+                layerGroups.crater.addLayer(crater);
+            }
+
+            // Add impact point marker
+            const impactMarker = L.marker(impactData.blast[0].center, {
+                icon: L.divIcon({
+                    className: 'impact-marker',
+                    html: '💥',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            }).bindPopup('<strong>Impact Point</strong>');
+            layerGroups.crater.addLayer(impactMarker);
+        }
+
+        // Load and display a specific scenario
+        function loadScenario(scenarioId) {
+            const scenario = impactScenarios[scenarioId];
+            if (!scenario) return;
+
+            currentScenario = scenarioId;
+
+            // Active button is handled by loadScenarioWrapper
+
+            // Update scenario info
+            document.getElementById('event-name').textContent = scenario.name;
+            document.getElementById('event-energy').textContent = scenario.energy;
+            document.getElementById('event-casualties').textContent = scenario.casualties;
+            document.getElementById('event-crater').textContent = scenario.crater;
+
+            // Center map on impact location
+            map.setView(scenario.location, scenarioId === 'chicxulub' ? 4 : 8);
+
+            // Update timeline for new scenario
+            if (timelineController) {
+                timelineController.duration = scenario.duration;
+                timelineController.currentTime = 0;
+                pauseTimeline();
+                updateTimelineDisplay();
+            }
+
+            // Render visualization (temporal if timeline is at 0, otherwise current time)
+            renderVisualization();
+        }
+
+        // Toggle layer visibility
+        function toggleLayer(layerType) {
+            const checkbox = document.getElementById(`${layerType}-layer`);
+            const layerGroup = layerGroups[layerType];
+
+            if (checkbox.checked) {
+                map.addLayer(layerGroup);
+            } else {
+                map.removeLayer(layerGroup);
+            }
+        }
+
+        // Timeline Controller Functions
+        function initializeTimeline() {
+            // Ensure elements exist before adding listeners
+            const timelineSlider = document.getElementById('timelineSlider');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const stepBtn = document.getElementById('stepBtn');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedDisplay = document.getElementById('speedDisplay');
+
+            if (!timelineSlider || !playPauseBtn) {
+                console.error('Timeline elements not found');
+                return;
+            }
+
+            // Timeline slider
+            timelineSlider.addEventListener('input', (e) => {
+                const percentage = parseFloat(e.target.value);
+                timelineController.currentTime = (percentage / 100) * timelineController.duration;
+                updateTimelineDisplay();
+                updateVisualizationForTime();
+            });
+
+            // Play/Pause button
+            playPauseBtn.addEventListener('click', () => {
+                toggleTimelinePlayback();
+            });
+
+            // Reset button
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    resetTimeline();
+                });
+            }
+
+            // Step button
+            if (stepBtn) {
+                stepBtn.addEventListener('click', () => {
+                    stepTimeline();
+                });
+            }
+
+            // Speed slider
+            if (speedSlider && speedDisplay) {
+                speedSlider.addEventListener('input', (e) => {
+                    timelineController.playbackSpeed = parseFloat(e.target.value);
+                    speedDisplay.textContent = timelineController.playbackSpeed.toFixed(1) + 'x';
+                });
+            }
+
+            // Initialize display
+            updateTimelineDisplay();
+        }
+
+        function toggleTimelinePlayback() {
+            if (timelineController.isPlaying) {
+                pauseTimeline();
+            } else {
+                playTimeline();
+            }
+        }
+
+        function playTimeline() {
+            timelineController.isPlaying = true;
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            if (playPauseBtn) {
+                playPauseBtn.textContent = 'Pause';
+            }
+            timelineController.lastUpdateTime = performance.now();
+            animateTimeline();
+        }
+
+        function pauseTimeline() {
+            timelineController.isPlaying = false;
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            if (playPauseBtn) {
+                playPauseBtn.textContent = 'Play';
+            }
+            if (timelineController.animationId) {
+                cancelAnimationFrame(timelineController.animationId);
+                timelineController.animationId = null;
+            }
+        }
+
+        function resetTimeline() {
+            pauseTimeline();
+            timelineController.currentTime = 0;
+            updateTimelineDisplay();
+            updateVisualizationForTime();
+        }
+
+        function stepTimeline() {
+            pauseTimeline();
+            timelineController.currentTime = Math.min(timelineController.currentTime + 3600, timelineController.duration);
+            updateTimelineDisplay();
+            updateVisualizationForTime();
+        }
+
+        function animateTimeline() {
+            if (!timelineController.isPlaying) return;
+
+            const currentTime = performance.now();
+            const deltaTime = (currentTime - timelineController.lastUpdateTime) / 1000;
+            timelineController.lastUpdateTime = currentTime;
+
+            timelineController.currentTime += deltaTime * timelineController.playbackSpeed * 3600;
+
+            if (timelineController.currentTime >= timelineController.duration) {
+                timelineController.currentTime = timelineController.duration;
+                pauseTimeline();
+            }
+
+            updateTimelineDisplay();
+            updateVisualizationForTime();
+
+            if (timelineController.isPlaying) {
+                timelineController.animationId = requestAnimationFrame(() => animateTimeline());
+            }
+        }
+
+        function updateTimelineDisplay() {
+            const percentage = (timelineController.currentTime / timelineController.duration) * 100;
+
+            const timelineSlider = document.getElementById('timelineSlider');
+            const timelineProgress = document.getElementById('timelineProgress');
+            const currentTimeElement = document.getElementById('currentTime');
+
+            if (timelineSlider) {
+                timelineSlider.value = percentage;
+            }
+            if (timelineProgress) {
+                timelineProgress.style.width = percentage + '%';
+            }
+            if (currentTimeElement) {
+                currentTimeElement.textContent = formatTime(timelineController.currentTime);
+            }
+
+            updateTimelineMarkers();
+        }
+
+        function updateTimelineMarkers() {
+            const scenario = impactScenarios[currentScenario];
+            const markersContainer = document.getElementById('timelineMarkers');
+            markersContainer.innerHTML = '';
+
+            if (scenario.markers) {
+                scenario.markers.forEach(marker => {
+                    const markerElement = document.createElement('div');
+                    markerElement.className = 'timeline-marker';
+                    markerElement.setAttribute('data-label', marker.label);
+
+                    const percentage = (marker.time / scenario.duration) * 100;
+                    markerElement.style.left = percentage + '%';
+
+                    markersContainer.appendChild(markerElement);
+                });
+            }
+        }
+
+        function updateVisualizationForTime() {
+            renderVisualization();
+        }
+
+        function renderVisualization() {
+            const scenario = impactScenarios[currentScenario];
+            if (!scenario) return;
+
+            // If timeline is at 0 or no temporal effects, show static visualization
+            if (timelineController.currentTime === 0 || !scenario.temporalEffects) {
+                renderImpactVisualization(scenario.impactData);
+                updateRealtimeData(getStaticData(scenario));
+            } else {
+                // Show temporal visualization
+                const interpolatedData = interpolateTemporalData(timelineController.currentTime, scenario);
+                renderTemporalVisualization(scenario, interpolatedData);
+                updateRealtimeData(interpolatedData);
+            }
+        }
+
+        function getStaticData(scenario) {
+            // Return baseline data for static visualization
+            return {
+                blastRadius: 0,
+                seismicIntensity: 0,
+                thermalRadius: 0,
+                casualties: 0,
+                airQuality: 50, // Good air quality
+                temperatureRise: 0,
+                radiationLevel: 0,
+                windSpeed: 0,
+                debrisCloud: 0,
+                infrastructureDamage: 0
+            };
+        }
+
+        function updateRealtimeData(data) {
+            // Update Richter Scale (based on seismic intensity)
+            const richterElement = document.getElementById('richter-value');
+            if (richterElement) {
+                richterElement.textContent = data.seismicIntensity.toFixed(1);
+                richterElement.className = 'data-value';
+                if (data.seismicIntensity >= 7.0) {
+                    richterElement.classList.add('critical');
+                } else if (data.seismicIntensity >= 4.0) {
+                    richterElement.classList.add('warning');
+                } else if (data.seismicIntensity < 1.0) {
+                    richterElement.classList.add('good');
+                }
+            }
+
+            // Update Casualties
+            const casualtiesElement = document.getElementById('casualties-value');
+            if (casualtiesElement) {
+                casualtiesElement.textContent = formatNumber(data.casualties);
+                casualtiesElement.className = 'data-value';
+                if (data.casualties > 1000000) {
+                    casualtiesElement.classList.add('critical');
+                } else if (data.casualties > 1000) {
+                    casualtiesElement.classList.add('warning');
+                } else {
+                    casualtiesElement.classList.add('good');
+                }
+            }
+
+            // Update Air Quality Index
+            const aqiElement = document.getElementById('aqi-value');
+            if (aqiElement) {
+                let aqiText = '';
+                let aqiClass = 'data-value';
+
+                if (data.airQuality <= 50) {
+                    aqiText = `Good (${data.airQuality})`;
+                    aqiClass += ' good';
+                } else if (data.airQuality <= 100) {
+                    aqiText = `Moderate (${data.airQuality})`;
+                } else if (data.airQuality <= 150) {
+                    aqiText = `Unhealthy (${data.airQuality})`;
+                    aqiClass += ' warning';
+                } else if (data.airQuality <= 300) {
+                    aqiText = `Very Unhealthy (${data.airQuality})`;
+                    aqiClass += ' critical';
+                } else {
+                    aqiText = `Hazardous (${data.airQuality})`;
+                    aqiClass += ' critical';
+                }
+
+                aqiElement.textContent = aqiText;
+                aqiElement.className = aqiClass;
+            }
+
+            // Update Temperature Rise
+            const tempElement = document.getElementById('temp-value');
+            if (tempElement) {
+                tempElement.textContent = `+${data.temperatureRise.toFixed(1)}°C`;
+                tempElement.className = 'data-value';
+                if (data.temperatureRise > 50) {
+                    tempElement.classList.add('critical');
+                } else if (data.temperatureRise > 10) {
+                    tempElement.classList.add('warning');
+                } else {
+                    tempElement.classList.add('good');
+                }
+            }
+
+            // Update Radiation Level
+            const radiationElement = document.getElementById('radiation-value');
+            if (radiationElement) {
+                let radiationText = '';
+                let radiationClass = 'data-value';
+
+                if (data.radiationLevel === 0) {
+                    radiationText = 'Normal';
+                    radiationClass += ' good';
+                } else if (data.radiationLevel < 1) {
+                    radiationText = 'Slightly Elevated';
+                    radiationClass += ' warning';
+                } else if (data.radiationLevel < 3) {
+                    radiationText = 'Elevated';
+                    radiationClass += ' warning';
+                } else {
+                    radiationText = 'Dangerous';
+                    radiationClass += ' critical';
+                }
+
+                radiationElement.textContent = radiationText;
+                radiationElement.className = radiationClass;
+            }
+
+            // Update Wind Speed
+            const windElement = document.getElementById('wind-value');
+            if (windElement) {
+                windElement.textContent = `${data.windSpeed} km/h`;
+                windElement.className = 'data-value';
+                if (data.windSpeed > 200) {
+                    windElement.classList.add('critical');
+                } else if (data.windSpeed > 50) {
+                    windElement.classList.add('warning');
+                } else {
+                    windElement.classList.add('good');
+                }
+            }
+
+            // Update Debris Cloud
+            const debrisElement = document.getElementById('debris-value');
+            if (debrisElement) {
+                let debrisText = '';
+                let debrisClass = 'data-value';
+
+                if (data.debrisCloud === 0) {
+                    debrisText = 'None';
+                    debrisClass += ' good';
+                } else if (data.debrisCloud < 0.3) {
+                    debrisText = 'Light';
+                    debrisClass += ' warning';
+                } else if (data.debrisCloud < 0.7) {
+                    debrisText = 'Moderate';
+                    debrisClass += ' warning';
+                } else {
+                    debrisText = 'Heavy';
+                    debrisClass += ' critical';
+                }
+
+                debrisElement.textContent = debrisText;
+                debrisElement.className = debrisClass;
+            }
+
+            // Update Infrastructure Damage
+            const infrastructureElement = document.getElementById('infrastructure-value');
+            if (infrastructureElement) {
+                const remaining = 100 - data.infrastructureDamage;
+                infrastructureElement.textContent = `${remaining}%`;
+                infrastructureElement.className = 'data-value';
+                if (remaining < 20) {
+                    infrastructureElement.classList.add('critical');
+                } else if (remaining < 50) {
+                    infrastructureElement.classList.add('warning');
+                } else {
+                    infrastructureElement.classList.add('good');
+                }
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(1) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        function interpolateTemporalData(currentTime, scenario) {
+            const markers = scenario.markers;
+            const effects = scenario.temporalEffects;
+
+            let beforeIndex = 0;
+            let afterIndex = 0;
+
+            for (let i = 0; i < markers.length - 1; i++) {
+                if (currentTime >= markers[i].time && currentTime <= markers[i + 1].time) {
+                    beforeIndex = i;
+                    afterIndex = i + 1;
+                    break;
+                }
+            }
+
+            if (currentTime <= markers[0].time) {
+                return {
+                    blastRadius: effects.blastRadius[0],
+                    seismicIntensity: effects.seismicIntensity[0],
+                    thermalRadius: effects.thermalRadius[0],
+                    casualties: effects.casualties[0],
+                    airQuality: effects.airQuality[0],
+                    temperatureRise: effects.temperatureRise[0],
+                    radiationLevel: effects.radiationLevel[0],
+                    windSpeed: effects.windSpeed[0],
+                    debrisCloud: effects.debrisCloud[0],
+                    infrastructureDamage: effects.infrastructureDamage[0]
+                };
+            }
+
+            if (currentTime >= markers[markers.length - 1].time) {
+                const lastIndex = markers.length - 1;
+                return {
+                    blastRadius: effects.blastRadius[lastIndex],
+                    seismicIntensity: effects.seismicIntensity[lastIndex],
+                    thermalRadius: effects.thermalRadius[lastIndex],
+                    casualties: effects.casualties[lastIndex],
+                    airQuality: effects.airQuality[lastIndex],
+                    temperatureRise: effects.temperatureRise[lastIndex],
+                    radiationLevel: effects.radiationLevel[lastIndex],
+                    windSpeed: effects.windSpeed[lastIndex],
+                    debrisCloud: effects.debrisCloud[lastIndex],
+                    infrastructureDamage: effects.infrastructureDamage[lastIndex]
+                };
+            }
+
+            const beforeMarker = markers[beforeIndex];
+            const afterMarker = markers[afterIndex];
+            const timeDiff = afterMarker.time - beforeMarker.time;
+            const timeProgress = (currentTime - beforeMarker.time) / timeDiff;
+
+            const interpolate = (before, after) => {
+                return before + (after - before) * timeProgress;
+            };
+
+            return {
+                blastRadius: interpolate(effects.blastRadius[beforeIndex], effects.blastRadius[afterIndex]),
+                seismicIntensity: interpolate(effects.seismicIntensity[beforeIndex], effects.seismicIntensity[afterIndex]),
+                thermalRadius: interpolate(effects.thermalRadius[beforeIndex], effects.thermalRadius[afterIndex]),
+                casualties: Math.round(interpolate(effects.casualties[beforeIndex], effects.casualties[afterIndex])),
+                airQuality: Math.round(interpolate(effects.airQuality[beforeIndex], effects.airQuality[afterIndex])),
+                temperatureRise: interpolate(effects.temperatureRise[beforeIndex], effects.temperatureRise[afterIndex]),
+                radiationLevel: interpolate(effects.radiationLevel[beforeIndex], effects.radiationLevel[afterIndex]),
+                windSpeed: Math.round(interpolate(effects.windSpeed[beforeIndex], effects.windSpeed[afterIndex])),
+                debrisCloud: interpolate(effects.debrisCloud[beforeIndex], effects.debrisCloud[afterIndex]),
+                infrastructureDamage: Math.round(interpolate(effects.infrastructureDamage[beforeIndex], effects.infrastructureDamage[afterIndex]))
+            };
+        }
+
+        function renderTemporalVisualization(scenario, temporalData) {
+            // Clear existing layers
+            Object.values(layerGroups).forEach(layerGroup => {
+                layerGroup.clearLayers();
+            });
+
+            // Create dynamic blast zones based on temporal data
+            if (temporalData.blastRadius > 0) {
+                const blastZones = [
+                    { radius: temporalData.blastRadius * 1000 * 0.5, intensity: 1.0, description: "Total destruction" },
+                    { radius: temporalData.blastRadius * 1000 * 0.8, intensity: 0.7, description: "Severe damage" },
+                    { radius: temporalData.blastRadius * 1000, intensity: 0.4, description: "Moderate damage" }
+                ];
+
+                blastZones.forEach(zone => {
+                    const circle = L.circle(scenario.location, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('blast', zone.intensity),
+                        color: getEffectColor('blast', zone.intensity),
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.4
+                    }).bindPopup(`
+                        <strong>Blast Zone</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Intensity: ${(zone.intensity * 100).toFixed(0)}%<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.blast.addLayer(circle);
+                });
+            }
+
+            // Create dynamic seismic zones
+            if (temporalData.seismicIntensity > 0) {
+                const seismicZones = [
+                    { radius: temporalData.seismicIntensity * 50000, intensity: 0.8, description: "Strong seismic waves" },
+                    { radius: temporalData.seismicIntensity * 100000, intensity: 0.5, description: "Moderate tremors" }
+                ];
+
+                seismicZones.forEach(zone => {
+                    const circle = L.circle(scenario.location, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('seismic', zone.intensity),
+                        color: getEffectColor('seismic', zone.intensity),
+                        weight: 2,
+                        opacity: 0.6,
+                        fillOpacity: 0.3
+                    }).bindPopup(`
+                        <strong>Seismic Effects</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Magnitude: ${temporalData.seismicIntensity.toFixed(1)}<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.seismic.addLayer(circle);
+                });
+            }
+
+            // Create dynamic thermal zones
+            if (temporalData.thermalRadius > 0) {
+                const thermalZones = [
+                    { radius: temporalData.thermalRadius * 1000 * 0.6, intensity: 0.9, description: "Intense heat flash" },
+                    { radius: temporalData.thermalRadius * 1000, intensity: 0.6, description: "Significant thermal effects" }
+                ];
+
+                thermalZones.forEach(zone => {
+                    const circle = L.circle(scenario.location, {
+                        radius: zone.radius,
+                        fillColor: getEffectColor('thermal', zone.intensity),
+                        color: getEffectColor('thermal', zone.intensity),
+                        weight: 2,
+                        opacity: 0.7,
+                        fillOpacity: 0.3
+                    }).bindPopup(`
+                        <strong>Thermal Effects</strong><br>
+                        Radius: ${(zone.radius / 1000).toFixed(1)} km<br>
+                        Intensity: ${(zone.intensity * 100).toFixed(0)}%<br>
+                        ${zone.description}
+                    `);
+                    layerGroups.thermal.addLayer(circle);
+                });
+            }
+
+            // Render population density (from static data)
+            if (scenario.impactData && scenario.impactData.population) {
+                scenario.impactData.population.forEach(area => {
+                    const opacity = area.density * 0.5;
+                    const rectangle = L.rectangle(area.bounds, {
+                        fillColor: '#00ffff',
+                        color: '#00ffff',
+                        weight: 1,
+                        opacity: opacity,
+                        fillOpacity: opacity * 0.5
+                    }).bindPopup(`
+                        <strong>Population Density</strong><br>
+                        Density: ${(area.density * 100).toFixed(0)}%<br>
+                        ${area.description}
+                    `);
+                    layerGroups.population.addLayer(rectangle);
+                });
+            }
+
+            // Render crater (from static data)
+            if (scenario.impactData && scenario.impactData.crater) {
+                const crater = L.circle(scenario.impactData.crater.center, {
+                    radius: scenario.impactData.crater.radius,
+                    fillColor: '#8b4513',
+                    color: '#654321',
+                    weight: 3,
+                    opacity: 1.0,
+                    fillOpacity: 0.8
+                }).bindPopup(`
+                    <strong>Impact Crater</strong><br>
+                    ${scenario.impactData.crater.description}
+                `);
+                layerGroups.crater.addLayer(crater);
+            }
+
+            // Add impact point marker
+            const impactMarker = L.marker(scenario.location, {
+                icon: L.divIcon({
+                    className: 'impact-marker',
+                    html: '💥',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            }).bindPopup('<strong>Impact Point</strong>');
+            layerGroups.crater.addLayer(impactMarker);
+        }
+
+        function formatTime(seconds) {
+            const isNegative = seconds < 0;
+            const absSeconds = Math.abs(seconds);
+
+            const days = Math.floor(absSeconds / 86400);
+            const hours = Math.floor((absSeconds % 86400) / 3600);
+            const minutes = Math.floor((absSeconds % 3600) / 60);
+            const secs = Math.floor(absSeconds % 60);
+
+            let timeStr = '';
+            if (days > 0) {
+                timeStr = `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            return (isNegative ? 'T-' : 'T+') + timeStr;
+        }
+
+        // Wrapper function for scenario loading to handle button context
+        function loadScenarioWrapper(scenarioId, buttonElement) {
+            // Update active button
+            document.querySelectorAll('.scenario-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
+
+            // Load the scenario
+            loadScenario(scenarioId);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Initializing application...');
+            initMap();
+            initializeTimeline();
+
+            // Set initial active button
+            const firstButton = document.querySelector('.scenario-btn');
+            if (firstButton) {
+                firstButton.classList.add('active');
+            }
+        });
+    </script>
+</body>
+
+</html>
