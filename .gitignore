@@ -2,6 +2,12 @@
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
 
 # Project Documentation (if contains sensitive info)
 ProjectRequirements.txt
@@ -82,3 +88,6 @@ coverage.xml
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Cache files
+data/asteroids_cache.json
