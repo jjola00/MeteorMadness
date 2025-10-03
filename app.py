@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 
 from api.health import health_bp
+from api.asteroids import asteroids_bp
 from utils.errors import handle_error
 
 def create_app():
@@ -16,6 +17,7 @@ def create_app():
 
     # Register Blueprints
     app.register_blueprint(health_bp, url_prefix='/api')
+    app.register_blueprint(asteroids_bp, url_prefix='/api')
 
     # Register error handlers
     app.register_error_handler(Exception, handle_error)
