@@ -18,6 +18,7 @@ MeteorMadness is a comprehensive Python-based application designed to simulate a
   - A list of confirmed impact craters on Earth.
 - **2D Visualization**: A browser-based 2D visualizer to plot impact scenarios and their effects on a world map.
 - **REST API**: A Flask-based API to programmatically access asteroid and impact data.
+- **Game Mode**: An interactive game mode where players can simulate planetary defense, launch asteroids, and progress through levels based on their score.
 
 ## Project Structure
 
@@ -30,6 +31,7 @@ The project is organized into several key directories:
 - `/physics`: The core physics engine for calculating impact effects.
 - `/scripts`: A collection of utility scripts for downloading and processing reference data.
 - `/services`: The business logic layer that orchestrates data fetching, processing, and analysis.
+  - `/services/game`: Contains the core logic for the interactive game mode, including session management, defense simulation, and player progression.
 - `/2dvisualisation`: The frontend code for the 2D impact visualizer.
 
 ## Getting Started
@@ -86,10 +88,21 @@ The project is organized into several key directories:
 
 ## API Endpoints
 
+### Simulation Endpoints
+
 - `GET /api/asteroids`: Returns a list of cached asteroids.
 - `GET /api/asteroids/current`: Returns asteroids approaching Earth in the next 7 days from the live NASA API.
 - `GET /api/asteroids/<string:asteroid_id>`: Gets detailed data for a specific asteroid.
 - `GET /api/elevation?lat=<lat>&lng=<lng>`: Provides detailed elevation and terrain context for a given coordinate.
+
+### Game Mode Endpoints
+
+- `POST /api/game/start`: Initializes a new game session and returns a unique `session_id`.
+- `GET /api/game/asteroids-info`: Returns a list of the specific NASA asteroids used in the game's progression levels.
+- `GET /api/game/<session_id>/stats`: Retrieves the current player statistics for a given session.
+- `GET /api/game/<session_id>/unlocks`: Shows the asteroids and parameters the player has unlocked based on their level.
+- `POST /api/game/<session_id>/launch`: Launches an asteroid. The planetary defense system will attempt to intercept it.
+- `POST /api/game/<session_id>/impact`: If an asteroid is not deflected, this endpoint calculates the impact results and updates the player's score.
 
 ---
 *This project is for educational and demonstrative purposes.*

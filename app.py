@@ -5,6 +5,7 @@ import os
 
 from api.health import health_bp
 from api.asteroids import asteroids_bp
+from api.game import game_bp
 from utils.errors import handle_error
 from config import config, setup_logging, get_logger, RequestLoggingMiddleware
 
@@ -44,6 +45,9 @@ def create_app():
     # Register Blueprints
     app.register_blueprint(health_bp, url_prefix='/api')
     app.register_blueprint(asteroids_bp, url_prefix='/api')
+    
+    # Game mode endpoints - separate from simulation
+    app.register_blueprint(game_bp, url_prefix='/api')
 
     # Register error handlers
     app.register_error_handler(Exception, handle_error)
