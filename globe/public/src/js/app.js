@@ -271,80 +271,47 @@ class GlobeApp {
     }
     
     createAsteroidGeometry() {
-        // Start with icosahedron for more natural shape
-        const geometry = new THREE.IcosahedronGeometry(0.15, 3);
+        // Start with a sphere for simple shape
+        const geometry = new THREE.SphereGeometry(0.15, 32, 32);
         
-        // Add noise to vertices for rocky appearance
-        const positions = geometry.attributes.position.array;
-        const normals = geometry.attributes.normal.array;
+        // Add simple bumps to the surface
+        this.addAsteroidBumps(geometry);
         
-        for (let i = 0; i < positions.length; i += 3) {
-            // Add random noise to each vertex
-            const noise1 = (Math.random() - 0.5) * 0.1;
-            const noise2 = (Math.random() - 0.5) * 0.1;
-            const noise3 = (Math.random() - 0.5) * 0.1;
-            
-            positions[i] += noise1;     // x
-            positions[i + 1] += noise2; // y
-            positions[i + 2] += noise3; // z
-        }
-        
-        // Add more detail with subdivision
+        // Recalculate normals for proper lighting
         geometry.computeVertexNormals();
-        
-        // Add craters and bumps
-        this.addAsteroidDetails(geometry);
         
         return geometry;
     }
     
-    addAsteroidDetails(geometry) {
+    addAsteroidBumps(geometry) {
         const positions = geometry.attributes.position.array;
         
-        // Add some craters
-        for (let crater = 0; crater < 5; crater++) {
-            const craterCenter = Math.floor(Math.random() * positions.length / 3) * 3;
-            const craterRadius = 0.02 + Math.random() * 0.03;
-            const craterDepth = 0.01 + Math.random() * 0.02;
+        // Add simple bumps by pushing vertices outward
+        for (let i = 0; i < positions.length; i += 3) {
+            // Add small random bumps
+            const bumpStrength = 0.02 + Math.random() * 0.03; // Random bump size
             
-            for (let i = 0; i < positions.length; i += 3) {
-                const distance = Math.sqrt(
-                    Math.pow(positions[i] - positions[craterCenter], 2) +
-                    Math.pow(positions[i + 1] - positions[craterCenter + 1], 2) +
-                    Math.pow(positions[i + 2] - positions[craterCenter + 2], 2)
-                );
-                
-                if (distance < craterRadius) {
-                    const factor = 1 - (distance / craterRadius) * craterDepth;
-                    const direction = new THREE.Vector3(
-                        positions[i] - positions[craterCenter],
-                        positions[i + 1] - positions[craterCenter + 1],
-                        positions[i + 2] - positions[craterCenter + 2]
-                    ).normalize();
-                    
-                    positions[i] -= direction.x * craterDepth * factor;
-                    positions[i + 1] -= direction.y * craterDepth * factor;
-                    positions[i + 2] -= direction.z * craterDepth * factor;
-                }
-            }
+            // Get the normal direction (from center to vertex)
+            const normal = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]).normalize();
+            
+            // Push vertex outward along normal
+            positions[i] += normal.x * bumpStrength;
+            positions[i + 1] += normal.y * bumpStrength;
+            positions[i + 2] += normal.z * bumpStrength;
         }
         
         geometry.attributes.position.needsUpdate = true;
-        geometry.computeVertexNormals();
     }
     
     createAsteroidMaterial() {
-        // Create realistic rock material
+        // Create simple dark grey material
         const material = new THREE.MeshPhongMaterial({
-            color: this.getRandomRockColor(),
-            shininess: 5,
-            specular: 0x111111,
+            color: 0x333333, 
+            shininess: 10,
+            specular: 0x222222,
             transparent: false,
             side: THREE.FrontSide
         });
-        
-        // Add normal map for surface detail
-        this.addRockTexture(material);
         
         return material;
     }
