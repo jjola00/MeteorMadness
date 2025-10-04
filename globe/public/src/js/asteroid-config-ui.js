@@ -8,13 +8,7 @@ class AsteroidConfigUI {
         this.config = {
             name: 'Custom Asteroid',
             diameter: 500,
-            speed: 20,
-            type: 'mixed',
-            features: {
-                craters: true,
-                ridges: true,
-                bumps: true
-            }
+            speed: 20
         };
         
         this.init();
@@ -50,26 +44,6 @@ class AsteroidConfigUI {
         const speedSlider = document.getElementById('speedSlider');
         if (speedSlider) {
             speedSlider.value = this.config.speed;
-        }
-        
-        const typeSelect = document.getElementById('asteroidType');
-        if (typeSelect) {
-            typeSelect.value = this.config.type;
-        }
-        
-        const cratersCheckbox = document.getElementById('craters');
-        if (cratersCheckbox) {
-            cratersCheckbox.checked = this.config.features.craters;
-        }
-        
-        const ridgesCheckbox = document.getElementById('ridges');
-        if (ridgesCheckbox) {
-            ridgesCheckbox.checked = this.config.features.ridges;
-        }
-        
-        const bumpsCheckbox = document.getElementById('bumps');
-        if (bumpsCheckbox) {
-            bumpsCheckbox.checked = this.config.features.bumps;
         }
         
         console.log('✅ Initial values set for all controls');
@@ -114,61 +88,9 @@ class AsteroidConfigUI {
                 console.log('✅ Speed slider listener added');
             }
             
-            // Asteroid type - REAL-TIME updates
-            const typeSelect = document.getElementById('asteroidType');
-            if (typeSelect) {
-                typeSelect.addEventListener('change', (e) => {
-                    this.config.type = e.target.value;
-                    this.updateAsteroidPreview();
-                    console.log('🪨 Type updated:', this.config.type);
-                });
-                console.log('✅ Type select listener added');
-            }
-            
-            // Surface features checkboxes - REAL-TIME updates
-            const cratersCheckbox = document.getElementById('craters');
-            const ridgesCheckbox = document.getElementById('ridges');
-            const bumpsCheckbox = document.getElementById('bumps');
-            
-            if (cratersCheckbox) {
-                cratersCheckbox.addEventListener('change', (e) => {
-                    this.config.features.craters = e.target.checked;
-                    this.updateAsteroidPreview();
-                    console.log('🕳️ Craters updated:', this.config.features.craters);
-                });
-                console.log('✅ Craters checkbox listener added');
-            }
-            
-            if (ridgesCheckbox) {
-                ridgesCheckbox.addEventListener('change', (e) => {
-                    this.config.features.ridges = e.target.checked;
-                    this.updateAsteroidPreview();
-                    console.log('🏔️ Ridges updated:', this.config.features.ridges);
-                });
-                console.log('✅ Ridges checkbox listener added');
-            }
-            
-            if (bumpsCheckbox) {
-                bumpsCheckbox.addEventListener('change', (e) => {
-                    this.config.features.bumps = e.target.checked;
-                    this.updateAsteroidPreview();
-                    console.log('🔺 Bumps updated:', this.config.features.bumps);
-                });
-                console.log('✅ Bumps checkbox listener added');
-            }
-            
             // Action buttons
-            const previewBtn = document.getElementById('previewAsteroid');
             const launchBtn = document.getElementById('launchAsteroid');
             const backBtn = document.getElementById('backToGlobe');
-            
-            if (previewBtn) {
-                previewBtn.addEventListener('click', () => {
-                    this.updateAsteroidPreview();
-                    console.log('🔄 Manual preview update triggered');
-                });
-                console.log('✅ Preview button listener added');
-            }
             
             if (launchBtn) {
                 launchBtn.addEventListener('click', () => {
