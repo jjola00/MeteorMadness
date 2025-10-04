@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from datetime import datetime, timedelta
 from clients.nasa_api import nasa_api_client
 from services.asteroid_service import (
@@ -6,6 +6,7 @@ from services.asteroid_service import (
     find_asteroid_in_cache, 
     get_complete_asteroid_data
 )
+from services.elevation_service import get_impact_context
 
 asteroids_bp = Blueprint('asteroids', __name__)
 
@@ -111,4 +112,38 @@ def post_asteroid_data(asteroid_id):
         else:
             return jsonify({"error": f"Asteroid with ID {asteroid_id} not found."}), 404
     except Exception as e:
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@asteroids_bp.route('/elevation', methods=['GET'])
+def get_elevation_data():
+    """
+    Gets elevation and terrain context for a given latitude and longitude.
+    """
+    lat_str = request.args.get('lat')
+    lng_str = request.args.get('lng')
+
+    # Validate presence of lat/lng
+    if not lat_str or not lng_str:
+        return jsonify({"error": "Latitude and longitude are required parameters."}), 400
+
+    # Validate that lat/lng are valid floats
+    try:
+        lat = float(lat_str)
+        lng = float(lng_str)
+    except ValueError:
+        return jsonify({"error": "Latitude and longitude must be valid numbers."}), 400
+
+    # Validate ranges
+    if not -90 <= lat <= 90:
+        return jsonify({"error": "Latitude must be between -90 and 90."}), 400
+    if not -180 <= lng <= 180:
+        return jsonify({"error": "Longitude must be between -180 and 180."}), 400
+
+    try:
+        # Get the comprehensive impact context
+        context = get_impact_context(lat, lng)
+        return jsonify(context), 200
+    except Exception as e:
+        # In a real app, you'd want to log the error e
         return jsonify({"error": "An internal server error occurred."}), 500
