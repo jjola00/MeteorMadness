@@ -1,5 +1,5 @@
 """
-Physical constants and configuration values foreroid impact calculations.
+Physical constants and configuration values for asteroid impact calculations.
 All values sourced from peer-reviewed literature and established models.
 """
 
