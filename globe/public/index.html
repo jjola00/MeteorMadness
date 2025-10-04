@@ -9,17 +9,36 @@
 <body>
     <div id="container">
         <div id="info">
-            <h2>🌍 The Earth</h2>
-            <p>✨ Fully illuminated globe</p>
+            <h2>🎯 Asteroid Targeting Simulator</h2>
+            <p>🌍 Click anywhere on Earth to select impact target</p>
         </div>
         
         <div id="controls">
             <div class="control-item">🖱️ <strong>Mouse:</strong> Rotate globe</div>
-            <div class="control-item">🎯 <strong>Scroll:</strong> Zoom in/out</div>
-            <div class="control-item">🔄 <strong>Auto-rotate:</strong> Enabled</div>
-            <div class="control-item">☄️ <strong>Space:</strong> Spawn asteroid</div>
+            <div class="control-item">🎯 <strong>Click:</strong> Select impact target</div>
+            <div class="control-item">📏 <strong>Scroll:</strong> Zoom in/out</div>
+            <div class="control-item">☄️ <strong>Space:</strong> Launch custom asteroid</div>
             <div class="control-item">🗑️ <strong>C:</strong> Clear asteroids</div>
             <div class="control-item">⚙️ <strong><a href="asteroid-config.html" style="color: #ff6600; text-decoration: none;">Configure Custom Asteroid</a></strong></div>
+        </div>
+        
+        <!-- Asteroid Info Panel -->
+        <div id="asteroidInfo">
+            <h3>🚀 Current Asteroid</h3>
+            <div class="asteroid-details">
+                <div class="detail-item">
+                    <span class="label">Name:</span>
+                    <span id="asteroidName" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Diameter:</span>
+                    <span id="asteroidDiameter" class="value">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Speed:</span>
+                    <span id="asteroidSpeed" class="value">-</span>
+                </div>
+            </div>
         </div>
     </div>
 

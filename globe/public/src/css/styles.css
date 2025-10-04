@@ -69,9 +69,62 @@ body {
     min-width: 60px;
 }
 
+/* Asteroid Info Panel */
+#asteroidInfo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 102, 0, 0.3);
+    min-width: 200px;
+}
+
+#asteroidInfo h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #ff6600;
+    text-align: center;
+}
+
+.asteroid-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
+    font-weight: bold;
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.detail-item .value {
+    color: #ff6600;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
 
 @media (max-width: 768px) {
-    #info, #controls {
+    #info, #controls, #asteroidInfo {
         padding: 10px;
         font-size: 0.8em;
     }
@@ -80,8 +133,18 @@ body {
         font-size: 1.2em;
     }
     
+    #asteroidInfo h3 {
+        font-size: 1.1em;
+    }
+    
     .control-item {
         font-size: 12px;
+    }
+    
+    #asteroidInfo {
+        top: 10px;
+        right: 10px;
+        min-width: 150px;
     }
 }
 
@@ -96,5 +159,12 @@ body {
         bottom: 10px;
         left: 10px;
         right: 10px;
+    }
+    
+    #asteroidInfo {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: unset;
     }
 }

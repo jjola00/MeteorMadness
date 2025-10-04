@@ -30,7 +30,54 @@ class GlobeApp {
     start() {
         this.isRunning = true;
         this.animate();
+        this.loadAsteroidInfoOnStartup();
         console.log('🌍 Simple Three.js Globe loaded successfully!');
+    }
+    
+    loadAsteroidInfoOnStartup() {
+        // Load and display asteroid info immediately on page load
+        const asteroidConfig = this.getCustomAsteroidConfig();
+        if (asteroidConfig) {
+            this.updateAsteroidInfoDisplay(asteroidConfig);
+        } else {
+            this.showNoAsteroidConfiguredMessage();
+        }
+    }
+    
+    showNoAsteroidConfiguredMessage() {
+        // Show message when no asteroid is configured
+        const nameElement = document.getElementById('asteroidName');
+        const diameterElement = document.getElementById('asteroidDiameter');
+        const speedElement = document.getElementById('asteroidSpeed');
+        
+        if (nameElement) nameElement.textContent = 'None configured';
+        if (diameterElement) diameterElement.textContent = '-';
+        if (speedElement) speedElement.textContent = '-';
+        
+        // Show the info panel
+        const infoPanel = document.getElementById('asteroidInfo');
+        if (infoPanel) {
+            infoPanel.style.display = 'block';
+            
+            // Add configure prompt
+            const configurePrompt = document.createElement('div');
+            configurePrompt.id = 'configurePrompt';
+            configurePrompt.innerHTML = `
+                <div style="
+                    margin-top: 10px;
+                    padding: 8px;
+                    background: rgba(255, 102, 0, 0.2);
+                    border: 1px solid rgba(255, 102, 0, 0.5);
+                    border-radius: 5px;
+                    text-align: center;
+                ">
+                    <p style="margin: 0; font-size: 0.8em; color: #ff6600;">
+                        ⚙️ <a href="asteroid-config.html" style="color: #ff6600; text-decoration: none; font-weight: bold;">Configure Asteroid</a>
+                    </p>
+                </div>
+            `;
+            infoPanel.appendChild(configurePrompt);
+        }
     }
     
     animate() {
@@ -51,46 +98,164 @@ class GlobeApp {
         this.sceneManager.render();
     }
     
-    spawnAsteroid() {
-        // Create realistic rock-like asteroid
-        const asteroid = this.createRealisticAsteroid();
+    spawnAsteroidToTarget(targetPoint) {
+        if (!targetPoint) {
+            console.log('⚠️ No target point selected! Click on the globe first.');
+            return;
+        }
         
-        // Random spawn position
-        const distance = 8 + Math.random() * 4;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.random() * Math.PI;
+        // Clear existing asteroids first
+        this.clearAsteroids();
         
-        asteroid.position.set(
-            distance * Math.sin(phi) * Math.cos(theta),
-            distance * Math.sin(phi) * Math.sin(theta),
-            distance * Math.cos(phi)
-        );
+        // Get custom asteroid configuration from localStorage
+        const asteroidConfig = this.getCustomAsteroidConfig();
         
-        // Random velocity toward Earth
-        const direction = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), asteroid.position).normalize();
-        direction.x += (Math.random() - 0.5) * 0.3;
-        direction.y += (Math.random() - 0.5) * 0.3;
-        direction.z += (Math.random() - 0.5) * 0.3;
-        direction.normalize();
+        // Create asteroid with custom configuration
+        const asteroid = this.createCustomAsteroid(asteroidConfig);
+        
+        // Spawn position: Place asteroid behind camera, away from target
+        const spawnDistance = 15; // Distance from Earth center
+        
+        // Calculate direction from camera to target point
+        const cameraToTarget = new THREE.Vector3().subVectors(targetPoint, this.sceneManager.getCamera().position).normalize();
+        
+        // Spawn asteroid behind the camera, in the direction away from target
+        asteroid.position.copy(this.sceneManager.getCamera().position.clone().add(cameraToTarget.multiplyScalar(-spawnDistance)));
+        
+        // Calculate velocity directly toward target point
+        const direction = new THREE.Vector3().subVectors(targetPoint, asteroid.position).normalize();
+        
+        // Verify trajectory accuracy
+        const trajectoryCheck = asteroid.position.clone().add(direction.clone().multiplyScalar(20));
+        const trajectoryDistanceFromCenter = trajectoryCheck.length();
+        console.log('🎯 Trajectory verification:');
+        console.log('  📍 Spawn:', asteroid.position);
+        console.log('  📍 Target:', targetPoint);
+        console.log('  📐 Direction:', direction);
+        console.log('  🔍 20 units ahead:', trajectoryCheck);
+        console.log('  📏 Trajectory distance from center:', trajectoryDistanceFromCenter);
+        
+        // Calculate expected impact point
+        const expectedImpactPoint = this.calculateExpectedImpactPoint(asteroid.position, direction, targetPoint);
+        console.log('🎯 Expected impact point:', expectedImpactPoint);
+        console.log('📏 Distance from target:', expectedImpactPoint.distanceTo(targetPoint));
+        
+        // No randomness - perfect targeting
+        
+        // Use custom speed from configuration
+        const speed = asteroidConfig.speed * 0.01; // Convert km/s to scene units
         
         asteroid.userData = {
-            velocity: direction.multiplyScalar(0.1 + Math.random() * 0.2),
+            velocity: direction.multiplyScalar(speed),
             rotationSpeed: {
                 x: (Math.random() - 0.5) * 0.1,
                 y: (Math.random() - 0.5) * 0.1,
                 z: (Math.random() - 0.5) * 0.1
             },
-            scale: 0.8 + Math.random() * 0.4, // Random size variation
-            debris: [] // For particle effects
+            scale: asteroidConfig.diameter / 1000, // Convert meters to scene units
+            debris: [], // For particle effects
+            name: asteroidConfig.name,
+            targetPoint: targetPoint.clone() // Store target for debugging
         };
         
-        // Apply random scale
+        // Apply custom scale
         asteroid.scale.setScalar(asteroid.userData.scale);
         
         this.sceneManager.getScene().add(asteroid);
         this.asteroids.push(asteroid);
         
-        console.log('☄️ Realistic asteroid spawned!');
+        // Update asteroid info display
+        this.updateAsteroidInfoDisplay(asteroidConfig);
+        
+        console.log(`☄️ Custom asteroid "${asteroidConfig.name}" launched toward target!`);
+        console.log('🎯 Target point:', targetPoint);
+        console.log('📏 Target distance from center:', targetPoint.length());
+        console.log('🚀 Spawn position:', asteroid.position);
+        console.log('📏 Spawn distance from center:', asteroid.position.length());
+        console.log('📐 Direction vector:', direction);
+        console.log('🌍 Earth radius: 2.0, Collision at: 2.1');
+    }
+    
+    getCustomAsteroidConfig() {
+        // Try to get custom config from localStorage
+        const storedConfig = localStorage.getItem('asteroidConfig');
+        if (storedConfig) {
+            try {
+                const config = JSON.parse(storedConfig);
+                console.log('🎯 Using custom asteroid config:', config);
+                return config;
+            } catch (error) {
+                console.warn('⚠️ Failed to parse stored asteroid config:', error);
+            }
+        }
+        
+        // Default configuration if none stored
+        return {
+            name: 'Default Asteroid',
+            diameter: 500,
+            speed: 20
+        };
+    }
+    
+    createCustomAsteroid(config) {
+        // Create asteroid with custom configuration
+        const asteroid = this.createRealisticAsteroid();
+        
+        // Apply custom name (for logging/debugging)
+        asteroid.userData.name = config.name;
+        
+        return asteroid;
+    }
+    
+    updateAsteroidInfoDisplay(config) {
+        // Update the asteroid info panel
+        const nameElement = document.getElementById('asteroidName');
+        const diameterElement = document.getElementById('asteroidDiameter');
+        const speedElement = document.getElementById('asteroidSpeed');
+        
+        if (nameElement) nameElement.textContent = config.name;
+        if (diameterElement) diameterElement.textContent = `${config.diameter}m`;
+        if (speedElement) speedElement.textContent = `${config.speed} km/s`;
+        
+        // Show the info panel
+        const infoPanel = document.getElementById('asteroidInfo');
+        if (infoPanel) {
+            infoPanel.style.display = 'block';
+            
+            // Remove configure prompt if it exists
+            const configurePrompt = document.getElementById('configurePrompt');
+            if (configurePrompt) {
+                configurePrompt.remove();
+            }
+        }
+    }
+    
+    calculateExpectedImpactPoint(spawnPosition, direction, targetPoint) {
+        // Calculate where the asteroid will intersect with the Earth surface
+        // Earth center is at (0,0,0) with radius 2
+        
+        // Ray-sphere intersection: ray from spawnPosition in direction
+        // Sphere: center (0,0,0), radius 2
+        
+        const a = direction.dot(direction); // Should be 1 since direction is normalized
+        const b = 2 * spawnPosition.dot(direction);
+        const c = spawnPosition.dot(spawnPosition) - 4; // 4 = radius^2
+        
+        const discriminant = b * b - 4 * a * c;
+        
+        if (discriminant >= 0) {
+            const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+            const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+            
+            // Use the smaller positive t (closer intersection)
+            const t = Math.min(t1, t2);
+            if (t > 0) {
+                return spawnPosition.clone().add(direction.clone().multiplyScalar(t));
+            }
+        }
+        
+        // Fallback: return target point
+        return targetPoint.clone();
     }
     
     createRealisticAsteroid() {
@@ -274,7 +439,7 @@ class GlobeApp {
         for (let i = this.asteroids.length - 1; i >= 0; i--) {
             const asteroid = this.asteroids[i];
             
-            // Apply gravity
+            // Apply gravity toward Earth center
             const directionToEarth = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), asteroid.position).normalize();
             const gravityForce = directionToEarth.multiplyScalar(0.02);
             asteroid.userData.velocity.add(gravityForce);
@@ -290,8 +455,21 @@ class GlobeApp {
             // Add particle trail effect
             this.updateAsteroidTrail(asteroid);
             
-            // Check collision
-            if (asteroid.position.length() <= 2.1) {
+            // Check collision with Earth surface
+            const distanceFromCenter = asteroid.position.length();
+            if (distanceFromCenter <= 2.1) {
+                // Ensure impact happens exactly at target point
+                const targetPoint = asteroid.userData.targetPoint;
+                if (targetPoint) {
+                    // Move asteroid to exact target position for precise impact
+                    asteroid.position.copy(targetPoint);
+                }
+                
+                console.log('💥 Impact detected!');
+                console.log('📍 Impact position:', asteroid.position);
+                console.log('📏 Distance from center:', asteroid.position.length());
+                console.log('🎯 Target was:', targetPoint);
+                console.log('✅ Impact at exact target point!');
                 this.handleImpact(asteroid, i);
             }
         }
