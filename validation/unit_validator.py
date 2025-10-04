@@ -1,6 +1,15 @@
 """
-Unit validation and consistency checks for the physics calculations.
-Ensures all unit conversions are correct and consistent throughout the system.
+Unit validation and consistency checks for the Meteor Madness physics engine.
+
+This module ensures all unit conversions are mathematically correct and consistent
+throughout the system. Validates energy conversions, distance calculations, and
+physical constants against established scientific values.
+
+Classes:
+    UnitValidator: Main validation class for unit consistency checks
+
+Functions:
+    Various validation methods for different unit types and conversions
 """
 
 import sys

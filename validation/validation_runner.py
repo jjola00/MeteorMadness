@@ -1,6 +1,13 @@
 """
-Comprehensive validation suite runner.
-Executes all validation tests and generates scientific accuracy report.
+Comprehensive validation suite runner for Meteor Madness physics engine.
+
+This module orchestrates all validation tests and generates comprehensive scientific
+accuracy reports. Demonstrates that the physics engine meets peer-review standards
+for scientific computing applications.
+
+Functions:
+    generate_validation_report(): Complete validation with detailed reporting
+    quick_validation(): Fast validation for CI/CD pipelines
 """
 
 import sys

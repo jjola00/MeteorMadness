@@ -1,19 +1,42 @@
 """
-Simplified validation to demonstrate scientific accuracy without external dependencies.
-This proves the mathematical relationships and physics formulas are correct.
+Simplified validation suite for Meteor Madness physics engine.
+
+This module provides lightweigh    # Calculate Tunguska energy
+    t_radius = tunguska_diameter / 2
+    t_volume = (4/3) * PI * (t_radius ** 3)
+    t_mass = t_volume * DEFAULT_ASTEROID_DENSITYlidation without external dependencies,
+demonstrating that core mathematical relationships and physics formulas are
+scientifically accurate. Ideal for quick checks and environments without
+full scientific computing libraries.
+
+Functions:
+    validate_basic_physics(): Main validation function for core physics calculations
 """
 
 def validate_basic_physics():
-    """Test basic physics calculations using only built-in Python."""
+    """
+    Test basic physics calculations using only built-in Python.
+    
+    Returns:
+        bool: True if validation passes, False otherwise
+    """
     print("🧮 SIMPLIFIED PHYSICS VALIDATION")
     print("=" * 50)
     print("Validating core mathematical relationships without external libraries")
     print()
     
-    # Constants (from your config)
-    TNT_ENERGY_PER_KG = 4.184e6  # J/kg
-    EARTH_RADIUS_M = 6.371e6  # m
-    GRAVITATIONAL_CONSTANT = 6.67430e-11  # m³/kg/s²
+    # Physical constants (matching config/constants.py)
+    TNT_ENERGY_PER_KG = 4.184e6  # J/kg (TNT energy density)
+    EARTH_RADIUS_M = 6.371e6  # m (Earth radius)
+    GRAVITATIONAL_CONSTANT = 6.67430e-11  # m³/kg/s² (CODATA 2018)
+    DEFAULT_ASTEROID_DENSITY = 3000.0  # kg/m³ (typical stony asteroid)
+    PI = 3.14159265359  # π constant
+    
+    # Validation tolerances
+    ENERGY_CONVERSION_TOLERANCE = 0.001  # 0.1% for unit conversions
+    TUNGUSKA_TOLERANCE = 0.3  # 30% for historical event (airburst complexity)
+    REASONABLE_ENERGY_RANGE = (10, 200)  # MT range for 100m asteroid
+    REASONABLE_CRATER_RANGE = (1000, 5000)  # m range for crater diameter
     
     print("📊 TEST 1: Energy Unit Conversions")
     print("-" * 30)
@@ -26,7 +49,8 @@ def validate_basic_physics():
     print(f"1 Megaton TNT: {megaton_joules:.2e} J")
     print(f"Expected: {expected_mt_joules:.2e} J")
     print(f"Error: {energy_error*100:.6f}%")
-    print(f"Status: {'✅ PASSED' if energy_error < 0.001 else '❌ FAILED'}")
+    energy_conversion_passed = energy_error < ENERGY_CONVERSION_TOLERANCE
+    print(f"Status: {'✅ PASSED' if energy_conversion_passed else '❌ FAILED'}")
     
     print("\n📊 TEST 2: Kinetic Energy Formula")
     print("-" * 30)
@@ -34,13 +58,12 @@ def validate_basic_physics():
     # Test asteroid kinetic energy: KE = 0.5 * m * v²
     # Example: 100m diameter asteroid, 20 km/s
     diameter_m = 100
-    velocity_ms = 20000
-    density_kg_m3 = 3000
+    velocity_ms = 20000  # m/s (20 km/s typical impact velocity)
     
     # Calculate mass: m = (4/3) * π * r³ * density
     radius_m = diameter_m / 2
-    volume_m3 = (4/3) * 3.14159 * (radius_m ** 3)
-    mass_kg = volume_m3 * density_kg_m3
+    volume_m3 = (4/3) * PI * (radius_m ** 3)
+    mass_kg = volume_m3 * DEFAULT_ASTEROID_DENSITY
     
     # Kinetic energy
     kinetic_energy_j = 0.5 * mass_kg * (velocity_ms ** 2)
@@ -51,9 +74,9 @@ def validate_basic_physics():
     print(f"Kinetic Energy: {kinetic_energy_j:.2e} J")
     print(f"TNT Equivalent: {energy_mt:.2f} MT")
     
-    # Sanity check: This should give ~50-100 MT for a 100m asteroid
-    reasonable = 10 <= energy_mt <= 200
-    print(f"Reasonable range: {'✅ PASSED' if reasonable else '❌ FAILED'}")
+    # Sanity check: This should give reasonable energy for a 100m asteroid
+    energy_reasonable = REASONABLE_ENERGY_RANGE[0] <= energy_mt <= REASONABLE_ENERGY_RANGE[1]
+    print(f"Reasonable range ({REASONABLE_ENERGY_RANGE[0]}-{REASONABLE_ENERGY_RANGE[1]} MT): {'✅ PASSED' if energy_reasonable else '❌ FAILED'}")
     
     print("\n📊 TEST 3: Crater Scaling Relationships")
     print("-" * 30)
@@ -71,9 +94,9 @@ def validate_basic_physics():
     print(f"Impact Energy: {kinetic_energy_j:.2e} J")
     print(f"Estimated Crater Diameter: {crater_diameter_m:.0f} m")
     
-    # For 100m asteroid (~50 MT), expect ~2-3 km crater
-    crater_reasonable = 1000 <= crater_diameter_m <= 5000
-    print(f"Reasonable crater size: {'✅ PASSED' if crater_reasonable else '❌ FAILED'}")
+    # Expected crater size for this energy range
+    crater_reasonable = REASONABLE_CRATER_RANGE[0] <= crater_diameter_m <= REASONABLE_CRATER_RANGE[1]
+    print(f"Reasonable crater size ({REASONABLE_CRATER_RANGE[0]/1000:.1f}-{REASONABLE_CRATER_RANGE[1]/1000:.1f} km): {'✅ PASSED' if crater_reasonable else '❌ FAILED'}")
     
     print("\n📊 TEST 4: Historical Event Validation")
     print("-" * 30)
@@ -87,30 +110,31 @@ def validate_basic_physics():
     # Calculate total Tunguska energy
     t_radius = tunguska_diameter / 2
     t_volume = (4/3) * 3.14159 * (t_radius ** 3)
-    t_mass = t_volume * density_kg_m3
+    t_mass = t_volume * DEFAULT_ASTEROID_DENSITY
     t_total_energy_j = 0.5 * t_mass * (tunguska_velocity ** 2)
     t_total_energy_mt = t_total_energy_j / (TNT_ENERGY_PER_KG * 1e9)
     
     # For airburst, effective ground energy is ~50% of total
     t_effective_energy_mt = t_total_energy_mt * 0.5
     tunguska_error = abs(t_effective_energy_mt - tunguska_expected_mt) / tunguska_expected_mt
+    tunguska_passed = tunguska_error < TUNGUSKA_TOLERANCE
     
     print(f"Tunguska Parameters: {tunguska_diameter}m, {tunguska_velocity/1000} km/s")
     print(f"Total Kinetic Energy: {t_total_energy_mt:.1f} MT")
     print(f"Effective Ground Energy: {t_effective_energy_mt:.1f} MT (airburst)")
     print(f"Expected Energy: {tunguska_expected_mt} MT")
     print(f"Error: {tunguska_error*100:.1f}%")
-    print(f"Status: {'✅ PASSED' if tunguska_error < 0.3 else '❌ FAILED'}")
+    print(f"Status: {'✅ PASSED' if tunguska_passed else '❌ FAILED'}")
     
     # Overall assessment
     print("\n🎯 VALIDATION SUMMARY")
     print("=" * 50)
     
     tests_passed = [
-        energy_error < 0.001,
-        reasonable,
+        energy_conversion_passed,
+        energy_reasonable,
         crater_reasonable,
-        tunguska_error < 0.3
+        tunguska_passed
     ]
     
     passed_count = sum(tests_passed)

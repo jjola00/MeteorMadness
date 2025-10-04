@@ -1,6 +1,16 @@
 """
-Scientific validation of physics calculations against known asteroid impact events.
-This module validates our calculations against well-documented historical events.
+Scientific validation of physics calculations against historical asteroid impact events.
+
+This module validates the Meteor Madness physics engine against well-documented 
+historical events including Tunguska (1908), Chelyabinsk (2013), Chicxulub (66 MYA),
+and Meteor Crater Arizona. All calculations are compared against peer-reviewed
+scientific literature to ensure accuracy.
+
+Classes:
+    ScientificValidator: Main validation class with historical event data and methods
+
+Functions:
+    run_scientific_validation(): Entry point for validation suite
 """
 
 import sys
