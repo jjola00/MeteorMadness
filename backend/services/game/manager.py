@@ -1,15 +1,15 @@
 import uuid
 from typing import Dict, Optional, Any
 
-from services.game.session import GameSession
-from services.game.defense import simulate_defense_attempt
+from backend.services.game.session import GameSession
+from backend.services.game.defense import simulate_defense_attempt
 # Import the physics calculation class, assuming the user meant backend.physics
 from backend.physics.impact import ImpactPhysics
 # This service is not yet implemented, so we will use mock data.
 # from services.population_service import get_population_in_radius
 
 # Note: get_level_unlocks is not directly used in the manager but is part of the game logic suite.
-from services.game.progression import get_level_unlocks
+from backend.services.game.progression import get_level_unlocks
 # This service function is available but not used in the current game logic.
 # from services.asteroid_service import get_complete_asteroid_data
 

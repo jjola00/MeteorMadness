@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
-from services.game.manager import GameManager
-from services.game.progression import get_level_unlocks
+from backend.services.game.manager import GameManager
+from backend.services.game.progression import get_level_unlocks
 from services.asteroid_service import get_cached_asteroids, find_asteroid_in_cache
 
 # This blueprint handles the game mode API, which is separate from the main simulation API.
