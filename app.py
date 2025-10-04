@@ -3,9 +3,9 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-from api.health import health_bp
-from api.asteroids import asteroids_bp
-from utils.errors import handle_error
+from backend.api.health import health_bp
+from backend.api.asteroids import asteroids_bp
+from backend.utils.errors import handle_error
 from config import config, setup_logging, get_logger, RequestLoggingMiddleware
 
 # Load environment variables

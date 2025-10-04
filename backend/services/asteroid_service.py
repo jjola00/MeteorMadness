@@ -1,8 +1,8 @@
 from typing import Dict, Any, Optional, List
 import json
 import os
-from clients.nasa_api import nasa_api_client
-from clients.sbdb_api import sbdb_api_client
+from backend.clients.nasa_api import nasa_api_client
+from backend.clients.sbdb_api import sbdb_api_client
 
 def get_complete_asteroid_data(asteroid_id: str) -> Optional[Dict[str, Any]]:
     """
