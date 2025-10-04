@@ -16,7 +16,7 @@ import os
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.conversions import UnitConverter, validate_coordinates
+from backend.utils.conversions import UnitConverter, validate_coordinates
 from config.constants import (
     EARTH_RADIUS_M, EARTH_RADIUS_KM, OCEAN_DEPTH_AVG_M, SEISMIC_WAVE_VELOCITY_MS,
     TSUNAMI_WAVE_VELOCITY_MS, TSUNAMI_EFFICIENCY_OCEAN, TSUNAMI_EFFICIENCY_LAND,

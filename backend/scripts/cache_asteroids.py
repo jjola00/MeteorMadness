@@ -16,8 +16,8 @@ else:
     print("Warning: .env file not found.")
 
 
-from services.asteroid_service import get_complete_asteroid_data
-from clients.nasa_api import nasa_api_client
+from backend.services.asteroid_service import get_complete_asteroid_data
+from backend.clients.nasa_api import nasa_api_client
 
 #ok guys, this is cache asteroid data script in case we decide go cache first for the demo and the fallback real api call!
 

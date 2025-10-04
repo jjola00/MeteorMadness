@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime, timedelta
-from clients.nasa_api import nasa_api_client
-from services.asteroid_service import (
+from backend.clients.nasa_api import nasa_api_client
+from backend.services.asteroid_service import (
     get_cached_asteroids, 
     find_asteroid_in_cache, 
     get_complete_asteroid_data
 )
-from services.elevation_service import get_impact_context
+from backend.services.elevation_service import get_impact_context
 
 asteroids_bp = Blueprint('asteroids', __name__)
 

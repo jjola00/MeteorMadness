@@ -15,7 +15,7 @@ import os
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.conversions import UnitConverter
+from backend.utils.conversions import UnitConverter
 from config.constants import (
     EARTH_RADIUS_M, AU_M, TYPICAL_IMPACTOR_MASS_KG, TYPICAL_IMPACTOR_VELOCITY_KMS,
     THRUST_EFFICIENCY_DEFAULT, MOMENTUM_TRANSFER_EFFICIENCY

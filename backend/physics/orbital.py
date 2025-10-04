@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.constants import GM_SUN, GM_EARTH, EARTH_RADIUS_M, AU_M
 
-from utils.conversions import UnitConverter, validate_coordinates
+from backend.utils.conversions import UnitConverter, validate_coordinates
 
 
 class OrbitalMechanics:

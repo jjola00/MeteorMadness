@@ -6,12 +6,8 @@ Handles kinetic energy, crater formation, and immediate impact effects.
 import numpy as np
 import scipy.optimize as opt
 from typing import Dict, Tuple, Optional
-import sys
-import os
-# Add the parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.conversions import (
+from backend.utils.conversions import (
     UnitConverter, 
     kinetic_energy, 
     estimate_asteroid_mass,

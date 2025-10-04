@@ -9,7 +9,7 @@ used by downstream physics calculations (e.g., tsunami modeling).
 from functools import lru_cache
 from typing import Optional, Dict
 
-from clients.elevation_api import elevation_client
+from backend.clients.elevation_api import elevation_client
 
 @lru_cache(maxsize=1000)
 def get_elevation_at_point(lat: float, lng: float) -> Optional[float]:
