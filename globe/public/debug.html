@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Asteroid Config</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #000; color: #fff; }
+        #debug { background: #333; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        #asteroidPreview { width: 400px; height: 300px; border: 2px solid #fff; margin: 20px 0; }
+        button { padding: 10px 20px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Asteroid Configuration Debug</h1>
+    
+    <div id="debug">
+        <h3>Debug Information:</h3>
+        <div id="debugLog"></div>
+    </div>
+    
+    <div id="asteroidPreview"></div>
+    
+    <div>
+        <button onclick="testScene()">Test Scene Creation</button>
+        <button onclick="testUI()">Test UI Elements</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        function log(message) {
+            const debugLog = document.getElementById('debugLog');
+            debugLog.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+        
+        function testScene() {
+            log('🧪 Testing scene creation...');
+            try {
+                const scene = new THREE.Scene();
+                log('✅ Scene created successfully');
+                
+                const camera = new THREE.PerspectiveCamera(75, 400/300, 0.1, 1000);
+                log('✅ Camera created successfully');
+                
+                const renderer = new THREE.WebGLRenderer();
+                renderer.setSize(400, 300);
+                log('✅ Renderer created successfully');
+                
+                const container = document.getElementById('asteroidPreview');
+                if (container) {
+                    container.appendChild(renderer.domElement);
+                    log('✅ Renderer added to container');
+                } else {
+                    log('❌ Container not found');
+                }
+                
+                camera.position.z = 5;
+                
+                const geometry = new THREE.BoxGeometry();
+                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const cube = new THREE.Mesh(geometry, material);
+                scene.add(cube);
+                
+                function animate() {
+                    requestAnimationFrame(animate);
+                    cube.rotation.x += 0.01;
+                    cube.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+                animate();
+                
+                log('✅ Test scene running successfully');
+                
+            } catch (error) {
+                log('❌ Error creating test scene: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        function testUI() {
+            log('🧪 Testing UI elements...');
+            
+            const elements = [
+                'asteroidPreview',
+                'asteroidName',
+                'diameterSlider',
+                'speedSlider',
+                'asteroidType',
+                'craters',
+                'ridges',
+                'bumps',
+                'previewAsteroid',
+                'launchAsteroid',
+                'backToGlobe'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    log('✅ Found element: ' + id);
+                } else {
+                    log('❌ Missing element: ' + id);
+                }
+            });
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            log('🚀 Debug page loaded');
+            setTimeout(() => {
+                testUI();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+/* Asteroid Configuration Page Styles */
+
+body {
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#asteroidConfigContainer {
+    display: flex;
+    flex-direction: row; /* Horizontal layout */
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Left Side: Asteroid Preview */
+#asteroidPreview {
+    flex: 2; /* Takes up 2/3 of the screen */
+    position: relative;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0c0c0c 100%);
+    min-width: 0; /* Allow flex item to shrink */
+}
+
+#previewInfo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    pointer-events: none; /* CRITICAL: Allow mouse events to pass through */
+}
+
+#previewInfo h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5em;
+}
+
+#asteroidStats {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Right Side: Configuration Panel */
+#configPanel {
+    flex: 1; /* Takes up 1/3 of the screen */
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+    color: white;
+    min-width: 300px; /* Minimum width for controls */
+    max-width: 400px; /* Maximum width */
+}
+
+.config-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.config-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2em;
+    color: #ff6600;
+}
+
+.config-header p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 1.1em;
+}
+
+/* Form Styles */
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #ffffff;
+}
+
+/* Input Styles */
+input[type="text"] {
+    padding: 12px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #ff6600;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Select Styles */
+select {
+    padding: 12px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: #ff6600;
+}
+
+select option {
+    background: #1a1a2e;
+    color: white;
+}
+
+/* Slider Styles */
+.slider-container {
+    position: relative;
+    margin: 10px 0;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff6600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #ff8833;
+    transform: scale(1.1);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff6600;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.checkbox-label:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #ff6600;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    font-size: 1em;
+    user-select: none;
+}
+
+/* Button Styles */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff6600, #ff8833);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff8833, #ffaa55);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #34ce57);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #34ce57, #40e667);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #868e96);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #868e96, #a0a8b0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    #asteroidConfigContainer {
+        flex-direction: column; /* Stack vertically on smaller screens */
+    }
+    
+    #asteroidPreview {
+        flex: 1;
+        height: 60vh; /* More space for asteroid on mobile */
+    }
+    
+    #configPanel {
+        flex: 1;
+        height: 40vh; /* Less space for controls on mobile */
+        min-width: unset;
+        max-width: unset;
+    }
+}
+
+@media (max-width: 768px) {
+    #configPanel {
+        padding: 20px;
+    }
+    
+    .config-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .btn {
+        padding: 12px 16px;
+        font-size: 1em;
+    }
+}
