@@ -94,3 +94,4 @@ data/asteroids_cache.json
 # Application Logs
 logs/
 *.log
+*/node_modules/
