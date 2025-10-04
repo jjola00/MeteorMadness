@@ -55,7 +55,7 @@ class OpenElevationClient(BaseAPIClient):
 
     def get_elevations_batch(self, coordinates: List[Tuple[float, float]]) -> List[Optional[float]]:
         """
-        Gets elevations for a batch of geographical coordinates.
+        Gets elevations for a batch of geographical coordinates using the POST API.
 
         Args:
             coordinates: A list of (latitude, longitude) tuples.
@@ -68,11 +68,13 @@ class OpenElevationClient(BaseAPIClient):
         if not coordinates:
             return []
             
-        locations_str = "|".join([f"{lat},{lng}" for lat, lng in coordinates])
-        params = {"locations": locations_str}
+        # Format the payload for the POST request
+        locations_payload = {
+            "locations": [{"latitude": lat, "longitude": lng} for lat, lng in coordinates]
+        }
         
         try:
-            data, error = self.get("/lookup", params=params)
+            data, error = self.post("/lookup", json_data=locations_payload)
 
             if error:
                 logger.error(f"Batch API request failed: {error}")
@@ -82,19 +84,13 @@ class OpenElevationClient(BaseAPIClient):
                 logger.warning("Batch request returned no results.")
                 return [None] * len(coordinates)
             
-            # Create a dictionary for efficient lookup of elevations by coordinates
-            elevation_map = {
-                (r['latitude'], r['longitude']): r['elevation'] 
-                for r in data['results'] if 'latitude' in r and 'longitude' in r
-            }
-
-            # Map the results back to the original order of coordinates
+            # The API returns results in the same order as the request.
+            # We can directly extract the elevation from each result.
             results_list = []
-            for lat, lng in coordinates:
-                elevation = elevation_map.get((lat, lng))
-                if elevation is not None:
-                    results_list.append(float(elevation))
-                else:
+            for result in data['results']:
+                try:
+                    results_list.append(float(result['elevation']))
+                except (ValueError, KeyError):
                     results_list.append(None)
             
             return results_list

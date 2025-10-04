@@ -7,7 +7,7 @@ class BaseAPIClient:
         self.api_key = api_key
         self.timeout = timeout
 
-    def _request(self, method, endpoint, params=None):
+    def _request(self, method, endpoint, params=None, json_data=None):
         """Makes a request to the API."""
         url = f"{self.base_url}{endpoint}"
         
@@ -18,7 +18,7 @@ class BaseAPIClient:
             params['api_key'] = self.api_key
 
         try:
-            response = requests.request(method, url, params=params, timeout=self.timeout)
+            response = requests.request(method, url, params=params, json=json_data, timeout=self.timeout)
             response.raise_for_status()
             return response.json(), None
         except requests.exceptions.RequestException as e:
@@ -26,4 +26,8 @@ class BaseAPIClient:
 
     def get(self, endpoint, params=None):
         """Performs a GET request."""
-        return self._request("GET", endpoint, params)
+        return self._request("GET", endpoint, params=params)
+
+    def post(self, endpoint, json_data=None):
+        """Performs a POST request."""
+        return self._request("POST", endpoint, json_data=json_data)
