@@ -16,19 +16,18 @@ import os
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.conversions import UnitConverter, EARTH_RADIUS_KM, validate_coordinates
+from utils.conversions import UnitConverter, validate_coordinates
+from config.constants import (
+    EARTH_RADIUS_M, OCEAN_DEPTH_AVG_M, SEISMIC_WAVE_VELOCITY_MS,
+    TSUNAMI_WAVE_VELOCITY_MS, TSUNAMI_EFFICIENCY_OCEAN, TSUNAMI_EFFICIENCY_LAND,
+    TSUNAMI_DISSIPATION_LENGTH_KM, MMI_THRESHOLDS
+)
 
 
 class EnvironmentalEffects:
     """Handles environmental effects of asteroid impacts."""
     
-    # Ocean and seismic constants
-    OCEAN_DEPTH_AVG_M = 3800.0  # Average ocean depth
-    SEISMIC_WAVE_VELOCITY_MS = 6000.0  # P-wave velocity in rock
-    TSUNAMI_WAVE_VELOCITY_MS = 200.0  # Tsunami wave velocity (shallow water)
-    
     # Earth properties
-    EARTH_RADIUS_M = EARTH_RADIUS_KM * 1000.0
     EARTH_CIRCUMFERENCE_M = 2 * np.pi * EARTH_RADIUS_M
 
     @staticmethod
@@ -114,11 +113,11 @@ class EnvironmentalEffects:
         if crater_diameter_m > water_depth_m:
             # Shallow water case - more efficient tsunami generation
             initial_amplitude_m = displacement_volume_m3 / (np.pi * crater_radius_m**2)
-            efficiency_factor = 0.5  # More energy goes into horizontal waves
+            efficiency_factor = TSUNAMI_EFFICIENCY_OCEAN
         else:
             # Deep water case - less efficient
             initial_amplitude_m = crater_diameter_m * 0.1  # Much smaller amplitude
-            efficiency_factor = 0.1
+            efficiency_factor = TSUNAMI_EFFICIENCY_LAND
         
         # Wave energy
         tsunami_energy_j = impact_energy_j * efficiency_factor
@@ -190,7 +189,7 @@ class EnvironmentalEffects:
         
         # Energy dissipation (simplified exponential decay)
         # Real tsunamis have complex dissipation mechanisms
-        dissipation_length_km = 5000  # Typical trans-oceanic scale
+        dissipation_length_km = TSUNAMI_DISSIPATION_LENGTH_KM
         energy_factor = np.exp(-distances_km / dissipation_length_km)
         
         # Combined amplitude
@@ -283,24 +282,11 @@ class EnvironmentalEffects:
             results['peak_accelerations_g'].append(max(pga_g, 0.001))  # Minimum detectable
             
             # Modified Mercalli Intensity (empirical relation to PGA)
-            if pga_g >= 0.65:
-                mmi = 10  # Extreme
-            elif pga_g >= 0.34:
-                mmi = 9   # Violent  
-            elif pga_g >= 0.18:
-                mmi = 8   # Severe
-            elif pga_g >= 0.092:
-                mmi = 7   # Very strong
-            elif pga_g >= 0.039:
-                mmi = 6   # Strong
-            elif pga_g >= 0.017:
-                mmi = 5   # Moderate
-            elif pga_g >= 0.0092:
-                mmi = 4   # Light
-            elif pga_g >= 0.0017:
-                mmi = 3   # Weak
-            else:
-                mmi = 2   # Not felt
+            mmi = 1  # Default: Not felt
+            for intensity, threshold in sorted(MMI_THRESHOLDS.items(), reverse=True):
+                if pga_g >= threshold:
+                    mmi = intensity
+                    break
             
             results['intensities_mmi'].append(mmi)
         
@@ -444,55 +430,7 @@ class EnvironmentalEffects:
         return results
 
 
-def run_environmental_test():
-    """Test the environmental effects calculations."""
-    print("🧪 Testing Environmental Effects Module")
-    print("=" * 50)
-    
-    # Test parameters
-    energy_j = 1e16  # 10 petajoules (~2.4 megatons TNT)
-    impact_lat = 35.0  # Pacific Ocean
-    impact_lon = -140.0
-    
-    print(f"Test case: {UnitConverter.tnt_equivalent(energy_j, 'TNT_Mt'):.1f} MT impact at ({impact_lat}, {impact_lon})")
-    print()
-    
-    # Complete environmental analysis
-    results = EnvironmentalEffects.complete_environmental_analysis(
-        energy_j, impact_lat, impact_lon
-    )
-    
-    # Print results
-    print(f"Impact type: {results['impact_type']}")
-    print()
-    
-    print("Atmospheric Effects:")
-    atm = results['atmospheric']
-    print(f"  Fireball radius: {atm['fireball_radius_km']:.1f} km")
-    print(f"  Cloud height: {atm['mushroom_cloud_height_km']:.1f} km")
-    print(f"  Pressure wave travel time: {atm['pressure_wave_travel_time_h']:.1f} hours")
-    print()
-    
-    print("Seismic Effects:")
-    seis = results['seismic']
-    print(f"  Earthquake magnitude: {seis['magnitude']:.1f}")
-    print(f"  Example distances: {seis['distances_km'][:3]} km")
-    print(f"  Example intensities (MMI): {seis['intensities_mmi'][:3]}")
-    print()
-    
-    if results['tsunami_generation']:
-        print("Tsunami Effects:")
-        tsu = results['tsunami_generation']
-        print(f"  Initial amplitude: {tsu['initial_amplitude_m']:.1f} m")
-        print(f"  Wavelength: {tsu['wavelength_km']:.1f} km")
-        print(f"  Wave period: {tsu['wave_period_min']:.1f} minutes")
-        print(f"  Initial wave speed: {tsu['initial_wave_speed_kmh']:.0f} km/h")
-        
-        prop = results['tsunami_propagation']
-        print(f"  Max propagation distance: {np.max(prop['distances_km']):.0f} km")
-        print(f"  Amplitude at 1000 km: {np.interp(1000, prop['distances_km'], prop['amplitudes_m']):.2f} m")
-    
-    print("\n🎉 Environmental effects test completed!")
+# TODO: Add API integration endpoints for environmental effects analysis
 
 
 if __name__ == "__main__":

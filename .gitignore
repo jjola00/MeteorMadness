@@ -57,15 +57,13 @@ coverage.xml
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
 
 # Logs and Databases
 *.log
 *.sqlite3
 *.db
 
-# API Keys and Secrets (backup patterns)
+# API Keys and Secrets
 **/secrets.json
 **/config/local.json
 **/*_secret*

@@ -16,23 +16,14 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.conversions import UnitConverter
+from config.constants import (
+    EARTH_RADIUS_M, AU_M, TYPICAL_IMPACTOR_MASS_KG, TYPICAL_IMPACTOR_VELOCITY_KMS,
+    THRUST_EFFICIENCY_DEFAULT, MOMENTUM_TRANSFER_EFFICIENCY
+)
 
 
 class MitigationStrategies:
     """Handles asteroid deflection and mitigation calculations."""
-    
-    # Typical spacecraft parameters
-    TYPICAL_IMPACTOR_MASS_KG = 1000.0  # 1 ton spacecraft
-    TYPICAL_IMPACTOR_VELOCITY_KMS = 10.0  # 10 km/s relative velocity
-    
-    # Deflection efficiency factors
-    MOMENTUM_TRANSFER_EFFICIENCY = {
-        'kinetic_impactor': 1.0,  # Perfect momentum transfer
-        'nuclear_standoff': 10.0,  # 10x momentum enhancement from ejecta
-        'nuclear_subsurface': 20.0,  # 20x enhancement from optimal coupling
-        'gravity_tractor': 1.0,  # Continuous low thrust
-        'ion_beam_shepherd': 1.2,  # Slight enhancement from plasma effects
-    }
 
     @staticmethod
     def deflection_timing_analysis(
@@ -57,7 +48,7 @@ class MitigationStrategies:
         
         # Semi-major axis change (for circular orbit approximation)
         # δa/a ≈ 2δv/v for small velocity changes
-        orbital_velocity_ms = 2 * np.pi * 1.5e11 / period_s  # Rough estimate
+        orbital_velocity_ms = 2 * np.pi * AU_M / period_s  # Rough estimate
         relative_sma_change = 2 * deflection_delta_v_ms / orbital_velocity_ms
         
         # Position change accumulates over time
@@ -76,7 +67,7 @@ class MitigationStrategies:
         final_deflection_m = min(abs(deflection_distance_m), linear_deflection_m)
         
         # Express in Earth radii for context
-        earth_radius_m = 6.371e6
+        earth_radius_m = EARTH_RADIUS_M
         deflection_earth_radii = final_deflection_m / earth_radius_m
         
         return {
@@ -165,7 +156,7 @@ class MitigationStrategies:
         tractor_mass_kg: float,
         orbital_distance_m: float,
         mission_duration_years: float,
-        thrust_efficiency: float = 0.8
+        thrust_efficiency: float = THRUST_EFFICIENCY_DEFAULT
     ) -> Dict[str, float]:
         """
         Calculate gravity tractor mission parameters.
@@ -428,79 +419,4 @@ class MitigationStrategies:
         return results
 
 
-def run_mitigation_test():
-    """Test the mitigation strategies calculations."""
-    print("🧪 Testing Mitigation Strategies Module")
-    print("=" * 50)
-    
-    # Test asteroid parameters
-    asteroid_params = {
-        'mass_kg': 1e12,  # 1 trillion kg
-        'diameter_m': 1000,  # 1 km
-        'velocity_ms': 20000  # 20 km/s
-    }
-    
-    orbital_params = {
-        'period_years': 2.5,
-        'time_to_impact_years': 10.0
-    }
-    
-    print("Test asteroid: 1 km diameter, 1 trillion kg mass")
-    print(f"Time to impact: {orbital_params['time_to_impact_years']} years")
-    print()
-    
-    # Test individual strategies
-    print("1. Kinetic Impactor Mission:")
-    kinetic = MitigationStrategies.kinetic_impactor_mission(
-        asteroid_params['mass_kg'],
-        asteroid_params['velocity_ms'],
-        impactor_mass_kg=1000,
-        momentum_enhancement=2.0
-    )
-    timing = MitigationStrategies.deflection_timing_analysis(
-        orbital_params['period_years'],
-        orbital_params['time_to_impact_years'],
-        kinetic['delta_v_ms']
-    )
-    print(f"  Velocity change: {kinetic['delta_v_mm_s']:.2f} mm/s")
-    print(f"  Final deflection: {timing['final_deflection_km']:.1f} km")
-    print(f"  Impactor energy: {kinetic['impactor_energy_tnt_kg']:.0f} kg TNT")
-    print()
-    
-    print("2. Gravity Tractor Mission:")
-    gravity = MitigationStrategies.gravity_tractor_mission(
-        asteroid_params['mass_kg'],
-        tractor_mass_kg=2000,
-        orbital_distance_m=100,
-        mission_duration_years=5
-    )
-    print(f"  Velocity change: {gravity['delta_v_mm_s']:.4f} mm/s")
-    print(f"  Mission duration: {gravity['mission_duration_years']} years")
-    print(f"  Required propellant: {gravity['propellant_mass_kg']:.0f} kg")
-    print()
-    
-    print("3. Nuclear Deflection:")
-    nuclear = MitigationStrategies.nuclear_deflection(
-        asteroid_params['mass_kg'],
-        asteroid_params['diameter_m'],
-        nuclear_yield_kt=100
-    )
-    print(f"  Velocity change: {nuclear['delta_v_mm_s']:.1f} mm/s")
-    print(f"  Nuclear yield: {nuclear['nuclear_yield_kt']} kilotons")
-    print(f"  Coupling efficiency: {nuclear['coupling_efficiency']:.1%}")
-    print()
-    
-    print("4. Mission Comparison:")
-    comparison = MitigationStrategies.mission_comparison(
-        asteroid_params, orbital_params
-    )
-    metrics = comparison['comparison_metrics']
-    print(f"  Best strategy: {metrics['best_strategy']}")
-    print(f"  Max deflection: {metrics['max_deflection_km']:.1f} km")
-    print(f"  Max velocity change: {metrics['max_delta_v_ms']*1000:.1f} mm/s")
-    
-    print("\n🎉 Mitigation strategies test completed!")
-
-
-if __name__ == "__main__":
-    run_mitigation_test()
+# TODO: Add API integration endpoints for mitigation strategy analysis

@@ -24,21 +24,21 @@ import os
 # Add the parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from config.constants import GM_SUN, GM_EARTH, EARTH_RADIUS_M, AU_M
+
 from utils.conversions import UnitConverter, validate_coordinates
 
 
 class OrbitalMechanics:
     """Handles orbital mechanics calculations for asteroids."""
     
-    # Gravitational parameters (m³/s²)
-    GM_SUN = const.GM_sun.to(u.m**3 / u.s**2).value
-    GM_EARTH = const.GM_earth.to(u.m**3 / u.s**2).value
-    
-    # Earth radius
-    EARTH_RADIUS_M = const.R_earth.to(u.m).value
-    
-    # AU in meters
-    AU_M = const.au.to(u.m).value
+    def __init__(self):
+        """Initialize with constants from configuration."""
+        # TODO: When NASA NEO API is integrated, these can be updated with latest ephemeris data
+        self.GM_SUN = GM_SUN
+        self.GM_EARTH = GM_EARTH
+        self.EARTH_RADIUS_M = EARTH_RADIUS_M
+        self.AU_M = AU_M
 
     @staticmethod
     def keplerian_to_cartesian(
@@ -62,7 +62,8 @@ class OrbitalMechanics:
             Tuple of (position_vector, velocity_vector) in meters and m/s
         """
         if gm is None:
-            gm = OrbitalMechanics.GM_SUN
+            from config.constants import GM_SUN
+            gm = GM_SUN
         
         # Convert angles to radians
         i_rad = np.radians(i)
@@ -137,7 +138,8 @@ class OrbitalMechanics:
             Dictionary with Keplerian elements
         """
         if gm is None:
-            gm = OrbitalMechanics.GM_SUN
+            from config.constants import GM_SUN
+            gm = GM_SUN
         
         r = np.linalg.norm(r_vec)
         v = np.linalg.norm(v_vec)
@@ -189,7 +191,7 @@ class OrbitalMechanics:
         
         return {
             'semi_major_axis_m': a,
-            'semi_major_axis_au': a / OrbitalMechanics.AU_M,
+            'semi_major_axis_au': a / AU_M,
             'eccentricity': e,
             'inclination_deg': i,
             'raan_deg': raan,
@@ -221,7 +223,8 @@ class OrbitalMechanics:
             Dictionary with time, position, and velocity arrays
         """
         if gm is None:
-            gm = OrbitalMechanics.GM_SUN
+            from config.constants import GM_SUN
+            gm = GM_SUN
         
         def orbital_dynamics(t, state):
             """Two-body dynamics with optional perturbations."""
@@ -238,7 +241,8 @@ class OrbitalMechanics:
                 # This is a very simplified Earth perturbation
                 # Real implementation would use full planetary positions
                 earth_distance = 1.5e11  # Approximate Earth distance
-                earth_gm = OrbitalMechanics.GM_EARTH
+                from config.constants import GM_EARTH
+                earth_gm = GM_EARTH
                 a_perturbation = -earth_gm * r_vec / earth_distance**3
             
             total_acceleration = a_primary + a_perturbation
@@ -272,7 +276,7 @@ class OrbitalMechanics:
             'time_days': solution.t / (24 * 3600),
             'positions_m': positions,
             'velocities_ms': velocities,
-            'distances_au': np.linalg.norm(positions, axis=1) / OrbitalMechanics.AU_M
+            'distances_au': np.linalg.norm(positions, axis=1) / AU_M
         }
 
     @staticmethod
@@ -292,7 +296,7 @@ class OrbitalMechanics:
         """
         if earth_soi_radius_m is None:
             # Earth's Hill sphere radius (simplified)
-            earth_soi_radius_m = OrbitalMechanics.EARTH_RADIUS_M * 100  # ~600,000 km
+            earth_soi_radius_m = EARTH_RADIUS_M * 100  # ~600,000 km
         
         positions = trajectory['positions_m']
         times = trajectory['time_s']
@@ -310,7 +314,7 @@ class OrbitalMechanics:
         impact_detected = min_distance_m < earth_soi_radius_m
         
         # If close approach, estimate impact parameters
-        if impact_detected and min_distance_m < OrbitalMechanics.EARTH_RADIUS_M * 10:
+        if impact_detected and min_distance_m < EARTH_RADIUS_M * 10:
             # Estimate impact velocity (simplified)
             velocity_at_approach = trajectory['velocities_ms'][min_distance_idx]
             impact_velocity_ms = np.linalg.norm(velocity_at_approach)
@@ -334,7 +338,7 @@ class OrbitalMechanics:
             'impact_detected': impact_detected,
             'min_distance_m': min_distance_m,
             'min_distance_km': min_distance_m / 1000,
-            'min_distance_earth_radii': min_distance_m / OrbitalMechanics.EARTH_RADIUS_M,
+            'min_distance_earth_radii': min_distance_m / EARTH_RADIUS_M,
             'time_to_closest_approach_s': min_distance_time_s,
             'time_to_closest_approach_days': min_distance_time_s / (24 * 3600),
             'impact_velocity_ms': impact_velocity_ms,
@@ -382,70 +386,3 @@ class OrbitalMechanics:
             'deflection_efficiency': deflection_efficiency,
             'mass_ratio': impactor_mass_kg / mass_kg
         }
-
-
-def run_orbital_test():
-    """Test the orbital mechanics calculations."""
-    print("🧪 Testing Orbital Mechanics Module")
-    print("=" * 40)
-    
-    # Test Keplerian to Cartesian conversion
-    print("Test 1: Earth's orbit (approximate)")
-    a = 1.5e11  # 1 AU in meters
-    e = 0.017  # Earth's eccentricity
-    i = 0.0    # Inclination
-    raan = 0.0
-    arg_per = 0.0
-    nu = 0.0   # At perihelion
-    
-    r_vec, v_vec = OrbitalMechanics.keplerian_to_cartesian(a, e, i, raan, arg_per, nu)
-    print(f"  Position: {np.linalg.norm(r_vec) / 1.5e11:.3f} AU from Sun")
-    print(f"  Velocity: {np.linalg.norm(v_vec) / 1000:.1f} km/s")
-    
-    # Test Cartesian to Keplerian conversion
-    elements = OrbitalMechanics.cartesian_to_keplerian(r_vec, v_vec)
-    print(f"  Reconstructed semi-major axis: {elements['semi_major_axis_au']:.3f} AU")
-    print(f"  Reconstructed eccentricity: {elements['eccentricity']:.3f}")
-    print()
-    
-    # Test orbit propagation
-    print("Test 2: Asteroid orbit propagation")
-    # Typical near-Earth asteroid orbit
-    initial_state = np.array([1.2e11, 0, 0, 0, 25000, 0])  # 1.2 AU, 25 km/s
-    
-    # Propagate for 1 year
-    trajectory = OrbitalMechanics.propagate_orbit(
-        initial_state, 
-        365.25 * 24 * 3600,  # 1 year in seconds
-        n_points=100
-    )
-    
-    print(f"  Propagated {len(trajectory['time_days'])} points over {trajectory['time_days'][-1]:.1f} days")
-    print(f"  Distance range: {np.min(trajectory['distances_au']):.2f} - {np.max(trajectory['distances_au']):.2f} AU")
-    
-    # Test Earth impact analysis
-    impact_analysis = OrbitalMechanics.earth_impact_probability(trajectory)
-    print(f"  Closest approach to Earth: {impact_analysis['min_distance_km']:.0f} km")
-    print(f"  Impact detected: {impact_analysis['impact_detected']}")
-    print()
-    
-    # Test deflection calculation
-    print("Test 3: Kinetic impactor deflection")
-    asteroid_mass = 1e12  # 1 trillion kg
-    impactor_mass = 1000  # 1 ton spacecraft
-    impact_velocity = 10000  # 10 km/s
-    
-    deflection = OrbitalMechanics.deflection_delta_v(
-        asteroid_mass, impactor_mass, impact_velocity
-    )
-    
-    print(f"  Asteroid mass: {asteroid_mass:.0e} kg")
-    print(f"  Impactor mass: {impactor_mass} kg")
-    print(f"  Velocity change: {deflection['delta_v_ms']:.2e} m/s ({deflection['delta_v_kms']:.2e} km/s)")
-    print(f"  Impactor energy: {deflection['impactor_energy_tnt_kg']:.1f} kg TNT equivalent")
-    
-    print("\n🎉 Orbital mechanics test completed!")
-
-
-if __name__ == "__main__":
-    run_orbital_test()

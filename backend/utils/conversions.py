@@ -217,17 +217,22 @@ class UnitConverter:
         return standardized
 
 
-def estimate_asteroid_mass(diameter_m: float, density_kg_m3: float = 3000.0) -> float:
+def estimate_asteroid_mass(diameter_m: float, density_kg_m3: float = None) -> float:
     """
     Estimate asteroid mass from diameter assuming spherical shape.
     
     Args:
         diameter_m: Asteroid diameter in meters
-        density_kg_m3: Asteroid density in kg/m³ (default: 3000 kg/m³)
+        density_kg_m3: Asteroid density in kg/m³ (uses default if not provided)
         
     Returns:
         Estimated mass in kg
+        
+    TODO: When NASA NEO API is integrated, use actual density data from spectral classification
     """
+    if density_kg_m3 is None:
+        density_kg_m3 = DEFAULT_ASTEROID_DENSITY
+        
     radius_m = diameter_m / 2.0
     volume_m3 = (4.0 / 3.0) * np.pi * radius_m**3
     return volume_m3 * density_kg_m3
@@ -261,8 +266,13 @@ def validate_coordinates(lat: float, lon: float) -> bool:
     return -90 <= lat <= 90 and -180 <= lon <= 180
 
 
-# Commonly used constants for quick reference
-EARTH_RADIUS_KM = 6371.0
-EARTH_MASS_KG = 5.972e24
-GRAVITATIONAL_PARAMETER_EARTH = 3.986004418e14  # m³/s²
-ESCAPE_VELOCITY_EARTH_MS = 11180.0  # m/s
+# Import constants from config
+# TODO: When API integration is added, these constants can be made configurable
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config.constants import (
+    EARTH_RADIUS_KM, EARTH_MASS_KG, GM_EARTH as GRAVITATIONAL_PARAMETER_EARTH,
+    ESCAPE_VELOCITY_EARTH_MS, DEFAULT_ASTEROID_DENSITY
+)

@@ -22,28 +22,15 @@ from utils.conversions import (
 class ImpactPhysics:
     """Handles asteroid impact physics calculations."""
     
-    # Standard asteroid density (kg/m³)
-    DEFAULT_ASTEROID_DENSITY = 3000.0
-    
-    # Gravity acceleration on Earth (m/s²)
-    EARTH_GRAVITY = 9.81
-    
-    # Scaling law constants for crater formation
-    # Based on research by Melosh, Collins, and others
-    CRATER_SCALING_CONSTANTS = {
-        'simple': {
-            'K1': 1.88,  # Crater diameter constant
-            'K2': 0.78,  # Crater depth constant
-            'mu': 0.41,   # Scaling exponent
-            'nu': 0.13    # Gravity scaling exponent
-        },
-        'complex': {
-            'K1': 1.54,
-            'K2': 0.13,
-            'mu': 0.22,
-            'nu': 0.13
-        }
-    }
+    # Import constants from configuration
+    # TODO: When API integration is added, asteroid density can be determined from spectral classification
+    def __init__(self):
+        from config.constants import (
+            DEFAULT_ASTEROID_DENSITY, EARTH_SURFACE_GRAVITY, CRATER_SCALING_CONSTANTS
+        )
+        self.DEFAULT_ASTEROID_DENSITY = DEFAULT_ASTEROID_DENSITY
+        self.EARTH_GRAVITY = EARTH_SURFACE_GRAVITY  
+        self.CRATER_SCALING_CONSTANTS = CRATER_SCALING_CONSTANTS
 
     @staticmethod
     def calculate_impact_energy(
@@ -98,15 +85,18 @@ class ImpactPhysics:
             Dictionary with crater dimensions
         """
         if gravity_ms2 is None:
-            gravity_ms2 = ImpactPhysics.EARTH_GRAVITY
+            from config.constants import EARTH_SURFACE_GRAVITY
+            gravity_ms2 = EARTH_SURFACE_GRAVITY
         if impactor_density_kg_m3 is None:
-            impactor_density_kg_m3 = ImpactPhysics.DEFAULT_ASTEROID_DENSITY
+            from config.constants import DEFAULT_ASTEROID_DENSITY
+            impactor_density_kg_m3 = DEFAULT_ASTEROID_DENSITY
         
         # Determine crater type based on energy
         # Simple craters: < ~10^16 J, Complex craters: > ~10^16 J
         is_complex = energy_j > 1e16
         
-        constants = ImpactPhysics.CRATER_SCALING_CONSTANTS['complex' if is_complex else 'simple']
+        from config.constants import CRATER_SCALING_CONSTANTS
+        constants = CRATER_SCALING_CONSTANTS['complex' if is_complex else 'simple']
         
         # Pi-scaling relationships
         # π₂ = (ρₜ/ρᵢ)^(1/3) * (g*D/V²)^ν
@@ -211,7 +201,8 @@ class ImpactPhysics:
             Dictionary with atmospheric entry results
         """
         if density_kg_m3 is None:
-            density_kg_m3 = ImpactPhysics.DEFAULT_ASTEROID_DENSITY
+            from config.constants import DEFAULT_ASTEROID_DENSITY
+            density_kg_m3 = DEFAULT_ASTEROID_DENSITY
         
         mass_kg = estimate_asteroid_mass(diameter_m, density_kg_m3)
         
@@ -251,8 +242,9 @@ class ImpactPhysics:
         # Final impact velocity (reduced by atmosphere)
         if diameter_m < 50:
             # Small objects reach terminal velocity
-            terminal_velocity_ms = np.sqrt(2 * mass_kg * ImpactPhysics.EARTH_GRAVITY / 
-                                         (1.225 * np.pi * (diameter_m/2)**2 * 0.5))  # Simplified drag
+            from config.constants import EARTH_SURFACE_GRAVITY, ATMOSPHERIC_DENSITY_SEA_LEVEL
+            terminal_velocity_ms = np.sqrt(2 * mass_kg * EARTH_SURFACE_GRAVITY / 
+                                         (ATMOSPHERIC_DENSITY_SEA_LEVEL * np.pi * (diameter_m/2)**2 * 0.5))  # Simplified drag
             final_velocity_ms = min(velocity_ms * 0.7, terminal_velocity_ms)
         else:
             # Large objects retain most velocity
@@ -298,7 +290,8 @@ class ImpactPhysics:
             Complete impact analysis dictionary
         """
         if asteroid_density_kg_m3 is None:
-            asteroid_density_kg_m3 = ImpactPhysics.DEFAULT_ASTEROID_DENSITY
+            from config.constants import DEFAULT_ASTEROID_DENSITY
+            asteroid_density_kg_m3 = DEFAULT_ASTEROID_DENSITY
         
         results = {}
         
@@ -345,52 +338,3 @@ class ImpactPhysics:
         results['effects'] = effects_results
         
         return results
-
-
-def run_impact_test():
-    """Test the impact physics calculations."""
-    print("🧪 Testing Impact Physics Module")
-    print("=" * 40)
-    
-    # Test case: 1 km asteroid at 20 km/s
-    diameter_m = 1000.0
-    velocity_ms = 20000.0
-    
-    print(f"Test case: {diameter_m}m asteroid at {velocity_ms/1000}km/s")
-    print()
-    
-    # Complete analysis
-    results = ImpactPhysics.complete_impact_analysis(diameter_m, velocity_ms)
-    
-    # Print results
-    print("Initial Parameters:")
-    print(f"  Mass: {results['initial_parameters']['mass_kg']:.2e} kg")
-    print()
-    
-    if 'atmospheric_entry' in results:
-        print("Atmospheric Entry:")
-        print(f"  Surviving mass: {results['atmospheric_entry']['surviving_mass_kg']:.2e} kg")
-        print(f"  Final velocity: {results['atmospheric_entry']['final_velocity_ms']/1000:.1f} km/s")
-        print()
-    
-    print("Impact Energy:")
-    print(f"  Total: {results['impact_energy']['total_energy_tnt_kt']:.1f} kilotons TNT")
-    print(f"  Effective: {results['impact_energy']['effective_energy_tnt_kt']:.1f} kilotons TNT")
-    print()
-    
-    print("Crater:")
-    print(f"  Diameter: {results['crater']['diameter_km']:.2f} km")
-    print(f"  Depth: {results['crater']['depth_m']:.0f} m")
-    print(f"  Type: {results['crater']['crater_type']}")
-    print()
-    
-    print("Effect Radii:")
-    print(f"  Thermal (burns): {results['effects']['thermal_radius_km']:.1f} km")
-    print(f"  Overpressure (5 psi): {results['effects']['overpressure_5psi_km']:.1f} km")
-    print(f"  Richter magnitude: {results['effects']['richter_magnitude']:.1f}")
-    
-    print("\n🎉 Impact physics test completed!")
-
-
-if __name__ == "__main__":
-    run_impact_test()
