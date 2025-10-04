@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -46,6 +46,39 @@ def create_app():
     app.register_blueprint(health_bp, url_prefix='/api')
     app.register_blueprint(asteroids_bp, url_prefix='/api')
     app.register_blueprint(environmental_effects_bp, url_prefix='/api/environmental-effects')
+    
+    # Serve the frontend visualizer at root
+    @app.route('/')
+    def index():
+        """Serve the 2D visualizer frontend."""
+        return send_from_directory('2dvisualisation', 'impact-visualizer-2d.html')
+    
+    # Serve static files from 2dvisualisation directory
+    @app.route('/<path:filename>')
+    def serve_static(filename):
+        """Serve static files (CSS, JS, etc.) from 2dvisualisation directory."""
+        return send_from_directory('2dvisualisation', filename)
+    
+    # API info endpoint
+    @app.route('/api')
+    def api_info():
+        """API information endpoint."""
+        return jsonify({
+            "name": config.API_TITLE,
+            "version": config.API_VERSION,
+            "status": "running",
+            "endpoints": {
+                "health": f"{config.API_PREFIX}/health",
+                "environmental_effects": "/api/environmental-effects",
+                "visualizer": "/"
+            }
+        })
+    
+    # Add favicon route to prevent 500 errors
+    @app.route('/favicon.ico')
+    def favicon():
+        """Return empty response for favicon requests."""
+        return '', 204
 
     # Register error handlers
     app.register_error_handler(Exception, handle_error)
