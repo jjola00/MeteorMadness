@@ -553,15 +553,22 @@
             }
 
             // Add impact point marker
-            const impactMarker = L.marker(impactData.blast[0].center, {
-                icon: L.divIcon({
-                    className: 'impact-marker',
-                    html: '💥',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                })
-            }).bindPopup('<strong>Impact Point</strong>');
-            layerGroups.crater.addLayer(impactMarker);
+            if (
+                impactData.blast &&
+                Array.isArray(impactData.blast) &&
+                impactData.blast.length > 0 &&
+                impactData.blast[0].center
+            ) {
+                const impactMarker = L.marker(impactData.blast[0].center, {
+                    icon: L.divIcon({
+                        className: 'impact-marker',
+                        html: '💥',
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    })
+                }).bindPopup('<strong>Impact Point</strong>');
+                layerGroups.crater.addLayer(impactMarker);
+            }
         }
 
         // Load and display a specific scenario
