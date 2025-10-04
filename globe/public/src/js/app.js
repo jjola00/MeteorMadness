@@ -87,6 +87,7 @@ class GlobeApp {
         
         // Update globe animations
         this.globeManager.animateStars();
+        this.globeManager.animateEarth();
         
         // Update asteroids
         this.updateAsteroids();
@@ -167,11 +168,24 @@ class GlobeApp {
         this.sceneManager.getScene().add(asteroid);
         this.asteroids.push(asteroid);
         
-        // Launch defense spacecraft if defense is enabled
+        // Stop Earth rotation and camera auto-rotation for asteroid impact
+        this.globeManager.stopEarthRotation();
+        this.controlsManager.stopAutoRotation();
+        
+        // Deploy DART spacecraft above target if defense is enabled
         if (this.defenseManager.isDefenseActive()) {
-            const defenseLaunched = this.defenseManager.launchSpacecraft(asteroid, targetPoint);
-            if (defenseLaunched) {
-                console.log('🛡️ DART defense spacecraft launched!');
+            const dartDeployed = this.defenseManager.deployDARTAboveTarget(targetPoint);
+            if (dartDeployed) {
+                console.log('🛡️ DART spacecraft deployed above target!');
+                // Change asteroid target to DART spacecraft position
+                asteroid.userData.targetPoint = this.defenseManager.spacecraft.position.clone();
+                console.log('🎯 Asteroid target changed to DART spacecraft at:', asteroid.userData.targetPoint);
+                
+                // Recalculate asteroid velocity to point toward DART
+                const directionToDART = new THREE.Vector3().subVectors(asteroid.userData.targetPoint, asteroid.position).normalize();
+                const speed = asteroid.userData.velocity.length();
+                asteroid.userData.velocity = directionToDART.multiplyScalar(speed);
+                console.log('🚀 Asteroid velocity updated to point toward DART');
             }
         }
         
@@ -575,6 +589,10 @@ class GlobeApp {
         // Remove asteroid
         this.sceneManager.getScene().remove(asteroid);
         this.asteroids.splice(index, 1);
+        
+        // Resume Earth rotation and camera auto-rotation after impact
+        this.globeManager.startEarthRotation();
+        this.controlsManager.startAutoRotation();
         
         console.log('💥 Realistic asteroid impact!');
     }

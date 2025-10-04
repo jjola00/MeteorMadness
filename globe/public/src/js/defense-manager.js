@@ -106,6 +106,93 @@ class DefenseManager {
         return this.isDefenseEnabled;
     }
     
+    deployDARTAboveTarget(targetPoint) {
+        if (!this.isDefenseEnabled) {
+            console.log('🛡️ Defense not enabled, skipping DART deployment');
+            return false;
+        }
+        
+        // Remove any existing spacecraft first
+        if (this.spacecraft) {
+            this.removeSpacecraft();
+        }
+        
+        console.log('🚀 Deploying DART spacecraft above target point');
+        
+        // Create spacecraft
+        this.spacecraft = this.createSpacecraft();
+        
+        // Calculate deployment position - place DART above the target point
+        const earthRadius = 2.0;
+        const deploymentHeight = 0.3; // Deploy 0.3 units above Earth surface
+        const deploymentDistance = earthRadius + deploymentHeight;
+        
+        // Deploy spacecraft above the target point
+        const targetDirection = targetPoint.clone().normalize();
+        const deploymentPosition = targetDirection.clone().multiplyScalar(deploymentDistance);
+        
+        console.log('🚀 DART deployment position:', deploymentPosition);
+        console.log('🎯 Target point:', targetPoint);
+        console.log('📏 Deployment height above Earth:', deploymentHeight);
+        
+        // Position spacecraft at deployment point
+        this.spacecraft.position.copy(deploymentPosition);
+        
+        // Add spacecraft to scene
+        this.scene.add(this.spacecraft);
+        
+        // Start monitoring for asteroid approach
+        this.startAsteroidMonitoring();
+        
+        return true;
+    }
+    
+    startAsteroidMonitoring() {
+        // Monitor for asteroids colliding with stationary DART
+        const monitorInterval = setInterval(() => {
+            if (!this.spacecraft || !this.spacecraft.parent) {
+                clearInterval(monitorInterval);
+                return;
+            }
+            
+            // Check for asteroids colliding with the DART
+            if (window.globeApp && window.globeApp.asteroids) {
+                for (let asteroid of window.globeApp.asteroids) {
+                    if (!asteroid.userData.wasDeflected && !asteroid.userData.hasCollidedWithDART) {
+                        const distanceToDART = asteroid.position.distanceTo(this.spacecraft.position);
+                        
+                        // If asteroid collides with DART, trigger deflection
+                        if (distanceToDART < 0.5) { // Collision threshold
+                            console.log('💥 Asteroid collided with stationary DART!');
+                            asteroid.userData.hasCollidedWithDART = true;
+                            this.triggerDeflection(asteroid);
+                            this.removeSpacecraft();
+                            clearInterval(monitorInterval);
+                            break;
+                        }
+                    }
+                }
+            }
+        }, 50); // Check every 50ms for responsive collision detection
+    }
+    
+    interceptAsteroid(asteroid) {
+        console.log('🚀 DART intercepting approaching asteroid');
+        
+        // Calculate intercept trajectory
+        const interceptPoint = this.calculateInterceptPoint(asteroid, this.spacecraft.position);
+        
+        if (interceptPoint) {
+            // Animate spacecraft to intercept point
+            this.animateSpacecraftToIntercept(interceptPoint, asteroid);
+        } else {
+            // Fallback: trigger deflection immediately
+            console.log('🎯 Fallback: triggering deflection immediately');
+            this.triggerDeflection(asteroid);
+            this.removeSpacecraft();
+        }
+    }
+    
     launchSpacecraft(asteroid, targetPoint) {
         if (!this.isDefenseEnabled) {
             console.log('🛡️ Defense not enabled, skipping spacecraft launch');
@@ -122,16 +209,13 @@ class DefenseManager {
         // Create spacecraft
         this.spacecraft = this.createSpacecraft();
         
-        // Calculate launch position - launch from Earth surface closest to asteroid
+        // Calculate launch position - launch from Earth surface above the target point
         const earthRadius = 2.0;
         const launchDistance = earthRadius + 0.5; // Launch from just above Earth surface
         
-        // Calculate direction from Earth center to asteroid
-        const earthCenter = new THREE.Vector3(0, 0, 0);
-        const asteroidDirection = asteroid.position.clone().normalize();
-        
-        // Launch spacecraft from Earth surface in the direction of the asteroid
-        const launchPosition = asteroidDirection.clone().multiplyScalar(launchDistance);
+        // Launch spacecraft from Earth surface above the target point (impact zone)
+        const targetDirection = targetPoint.clone().normalize();
+        const launchPosition = targetDirection.clone().multiplyScalar(launchDistance);
         
         console.log('🚀 Launch position calculated:', launchPosition);
         console.log('☄️ Asteroid position:', asteroid.position);
@@ -425,6 +509,14 @@ class DefenseManager {
                 // Remove asteroid from scene
                 asteroid.parent.remove(asteroid);
                 console.log('🌌 Deflected asteroid has left the scene');
+                
+                // Resume Earth rotation and camera auto-rotation after successful deflection
+                if (window.globeApp && window.globeApp.globeManager) {
+                    window.globeApp.globeManager.startEarthRotation();
+                }
+                if (window.globeApp && window.globeApp.controlsManager) {
+                    window.globeApp.controlsManager.startAutoRotation();
+                }
                 return;
             }
             

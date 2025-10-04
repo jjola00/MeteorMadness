@@ -8,6 +8,8 @@ class GlobeManager {
         this.globe = null;
         this.atmosphere = null;
         this.stars = null;
+        this.isRotating = true; // Earth rotation state
+        this.rotationSpeed = 0.002; // Earth rotation speed
         
         this.init();
     }
@@ -164,6 +166,22 @@ class GlobeManager {
             this.stars.rotation.x += 0.0001;
             this.stars.rotation.y += 0.0002;
         }
+    }
+    
+    animateEarth() {
+        if (this.globe && this.isRotating) {
+            this.globe.rotation.y += this.rotationSpeed;
+        }
+    }
+    
+    stopEarthRotation() {
+        this.isRotating = false;
+        console.log('🌍 Earth rotation stopped for asteroid impact');
+    }
+    
+    startEarthRotation() {
+        this.isRotating = true;
+        console.log('🌍 Earth rotation resumed');
     }
     
     getGlobe() {

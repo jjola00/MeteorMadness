@@ -303,4 +303,18 @@ class ControlsManager {
             this.controls.update();
         }
     }
+    
+    stopAutoRotation() {
+        if (this.controls) {
+            this.controls.autoRotate = false;
+            console.log('📷 Camera auto-rotation stopped');
+        }
+    }
+    
+    startAutoRotation() {
+        if (this.controls) {
+            this.controls.autoRotate = true;
+            console.log('📷 Camera auto-rotation resumed');
+        }
+    }
 }
