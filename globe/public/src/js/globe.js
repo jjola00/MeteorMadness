@@ -21,7 +21,7 @@ class GlobeManager {
     createGlobe() {
         const geometry = new THREE.SphereGeometry(2, 128, 128);
         
-        // Load Earth textures with fallbacks
+    
         const textureLoader = new THREE.TextureLoader();
         
         // Primary Earth texture
@@ -55,8 +55,6 @@ class GlobeManager {
         });
         
         this.globe = new THREE.Mesh(geometry, material);
-        this.globe.castShadow = true;
-        this.globe.receiveShadow = true;
         this.scene.add(this.globe);
         
         console.log('🌍 Earth globe created with high detail');

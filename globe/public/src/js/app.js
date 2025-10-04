@@ -99,8 +99,6 @@ class GlobeApp {
         const material = this.createAsteroidMaterial();
         
         const asteroid = new THREE.Mesh(geometry, material);
-        asteroid.castShadow = true;
-        asteroid.receiveShadow = true;
         
         // Add some random rotation offset
         asteroid.rotation.set(

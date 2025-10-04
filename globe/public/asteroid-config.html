@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Configuration - MeteorMadness</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <link rel="stylesheet" href="src/css/asteroid-config.css">
+</head>
+<body>
+    <div id="asteroidConfigContainer">
+        <!-- Left side: 3D Asteroid Preview -->
+        <div id="asteroidPreview">
+            <div id="previewInfo">
+                <h2>🪨 Asteroid Preview</h2>
+                <p id="asteroidStats">Diameter: <span id="diameterValue">500m</span> | Speed: <span id="speedValue">20 km/s</span></p>
+            </div>
+        </div>
+        
+        <!-- Right side: Configuration Panel -->
+        <div id="configPanel">
+            <div class="config-header">
+                <h1>☄️ Asteroid Configuration</h1>
+                <p>Design your custom asteroid</p>
+            </div>
+            
+            <div class="config-form">
+                <!-- Asteroid Name -->
+                <div class="form-group">
+                    <label for="asteroidName">Asteroid Name</label>
+                    <input type="text" id="asteroidName" placeholder="Enter asteroid name..." value="Custom Asteroid">
+                </div>
+                
+                <!-- Diameter Slider -->
+                <div class="form-group">
+                    <label for="diameterSlider">Diameter: <span id="diameterDisplay">500</span> meters</label>
+                    <div class="slider-container">
+                        <input type="range" id="diameterSlider" min="100" max="1000" value="500" step="50">
+                        <div class="slider-labels">
+                            <span>100m</span>
+                            <span>1000m</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Speed Slider -->
+                <div class="form-group">
+                    <label for="speedSlider">Speed: <span id="speedDisplay">20</span> km/s</label>
+                    <div class="slider-container">
+                        <input type="range" id="speedSlider" min="0" max="42" value="20" step="1">
+                        <div class="slider-labels">
+                            <span>0 km/s</span>
+                            <span>42 km/s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Asteroid Type -->
+                <div class="form-group">
+                    <label for="asteroidType">Asteroid Type</label>
+                    <select id="asteroidType">
+                        <option value="carbonaceous">Carbonaceous (Dark)</option>
+                        <option value="silicate">Silicate (Gray)</option>
+                        <option value="metallic">Metallic (Brown)</option>
+                        <option value="mixed">Mixed Composition</option>
+                    </select>
+                </div>
+                
+                <!-- Surface Features -->
+                <div class="form-group">
+                    <label>Surface Features</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="craters" checked>
+                            <span>Craters</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ridges" checked>
+                            <span>Ridges</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bumps" checked>
+                            <span>Surface Bumps</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="previewAsteroid" class="btn btn-primary">🔄 Update Preview</button>
+                    <button id="launchAsteroid" class="btn btn-success">🚀 Launch Asteroid</button>
+                    <button id="backToGlobe" class="btn btn-secondary">🌍 Back to Globe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Asteroid Configuration Scripts -->
+    <script src="src/js/asteroid-config-scene.js"></script>
+    <script src="src/js/asteroid-config-ui.js"></script>
+    <script src="src/js/asteroid-config.js"></script>
+</body>
+</html>

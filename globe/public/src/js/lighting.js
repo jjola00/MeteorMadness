@@ -9,38 +9,36 @@ class LightingManager {
     }
     
     init() {
-        // Enhanced lighting system for realistic rendering
+        // Uniform lighting system - no day/night effect
         
-        // Ambient light for overall illumination
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        // Strong ambient light for even illumination across entire globe
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
         this.scene.add(ambientLight);
         
-        // Directional light simulating sunlight
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        // Soft directional light for subtle depth without shadows
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
         directionalLight.position.set(5, 5, 5);
-        directionalLight.castShadow = true;
-        
-        // Configure shadow properties
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 50;
-        directionalLight.shadow.camera.left = -10;
-        directionalLight.shadow.camera.right = 10;
-        directionalLight.shadow.camera.top = 10;
-        directionalLight.shadow.camera.bottom = -10;
+        directionalLight.castShadow = false; // Disable shadows for uniform lighting
         
         this.scene.add(directionalLight);
         
-        // Point light for additional detail
-        const pointLight = new THREE.PointLight(0xffffff, 0.5, 100);
-        pointLight.position.set(-5, 3, 5);
-        this.scene.add(pointLight);
+        // Additional point lights for even coverage
+        const pointLight1 = new THREE.PointLight(0xffffff, 0.4, 100);
+        pointLight1.position.set(5, 0, 0);
+        this.scene.add(pointLight1);
         
-        // Hemisphere light for sky/ground color variation
-        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x2e7d32, 0.3);
-        this.scene.add(hemisphereLight);
+        const pointLight2 = new THREE.PointLight(0xffffff, 0.4, 100);
+        pointLight2.position.set(-5, 0, 0);
+        this.scene.add(pointLight2);
         
-        console.log('💡 Enhanced lighting system initialized');
+        const pointLight3 = new THREE.PointLight(0xffffff, 0.4, 100);
+        pointLight3.position.set(0, 5, 0);
+        this.scene.add(pointLight3);
+        
+        const pointLight4 = new THREE.PointLight(0xffffff, 0.4, 100);
+        pointLight4.position.set(0, -5, 0);
+        this.scene.add(pointLight4);
+        
+        console.log('💡 Uniform lighting system initialized - no day/night effect');
     }
 }
