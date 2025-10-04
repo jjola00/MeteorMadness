@@ -17,7 +17,7 @@ class DefenseManager {
     init() {
         this.setupUI();
         this.setupEventListeners();
-        console.log('🛡️ Defense Manager initialized');
+        // Defense Manager initialized
     }
     
     setupUI() {
@@ -25,7 +25,7 @@ class DefenseManager {
         this.statusText = document.getElementById('defenseStatusText');
         
         if (!this.defenseButton || !this.statusText) {
-            console.warn('⚠️ Defense UI elements not found');
+            // Defense UI elements not found
             return;
         }
         
@@ -44,7 +44,7 @@ class DefenseManager {
         this.isDefenseEnabled = !this.isDefenseEnabled;
         this.updateUI();
         
-        console.log(`🛡️ Defense ${this.isDefenseEnabled ? 'enabled' : 'disabled'}`);
+        // Defense status changed
         
         // If defense is enabled and there are asteroids in flight, launch spacecraft immediately
         if (this.isDefenseEnabled && window.globeApp && window.globeApp.asteroids.length > 0) {
@@ -57,15 +57,15 @@ class DefenseManager {
         const activeAsteroid = window.globeApp.asteroids.find(asteroid => !asteroid.userData.wasDeflected);
         
         if (activeAsteroid && window.globeApp.controlsManager.selectedImpactPoint) {
-            console.log('🚀 Defense enabled - launching spacecraft for existing asteroid');
+            // Defense enabled - launching spacecraft for existing asteroid
             const defenseLaunched = this.launchSpacecraft(activeAsteroid, window.globeApp.controlsManager.selectedImpactPoint);
             if (defenseLaunched) {
-                console.log('🛡️ DART defense spacecraft launched for existing asteroid!');
+                // DART defense spacecraft launched for existing asteroid
             }
         } else if (activeAsteroid) {
-            console.log('⚠️ No target point selected - cannot launch defense for existing asteroid');
+            // No target point selected - cannot launch defense for existing asteroid
         } else {
-            console.log('ℹ️ No active asteroids found to defend');
+            // No active asteroids found to defend
         }
     }
     
@@ -108,7 +108,7 @@ class DefenseManager {
     
     deployDARTAboveTarget(targetPoint) {
         if (!this.isDefenseEnabled) {
-            console.log('🛡️ Defense not enabled, skipping DART deployment');
+            // Defense not enabled, skipping DART deployment
             return false;
         }
         
@@ -117,7 +117,7 @@ class DefenseManager {
             this.removeSpacecraft();
         }
         
-        console.log('🚀 Deploying DART spacecraft above target point');
+        // Deploying DART spacecraft above target point
         
         // Create spacecraft
         this.spacecraft = this.createSpacecraft();
@@ -131,9 +131,9 @@ class DefenseManager {
         const targetDirection = targetPoint.clone().normalize();
         const deploymentPosition = targetDirection.clone().multiplyScalar(deploymentDistance);
         
-        console.log('🚀 DART deployment position:', deploymentPosition);
-        console.log('🎯 Target point:', targetPoint);
-        console.log('📏 Deployment height above Earth:', deploymentHeight);
+        // DART deployment position
+        // Target point
+        // Deployment height above Earth
         
         // Position spacecraft at deployment point
         this.spacecraft.position.copy(deploymentPosition);
@@ -163,7 +163,7 @@ class DefenseManager {
                         
                         // If asteroid collides with DART, trigger deflection
                         if (distanceToDART < 0.1) { // Collision threshold
-                            console.log('💥 Asteroid collided with stationary DART!');
+                            // Asteroid collided with stationary DART
                             asteroid.userData.hasCollidedWithDART = true;
                             this.triggerDeflection(asteroid);
                             this.removeSpacecraft();
@@ -177,7 +177,7 @@ class DefenseManager {
     }
     
     interceptAsteroid(asteroid) {
-        console.log('🚀 DART intercepting approaching asteroid');
+        // DART intercepting approaching asteroid
         
         // Calculate intercept trajectory
         const interceptPoint = this.calculateInterceptPoint(asteroid, this.spacecraft.position);
@@ -187,7 +187,7 @@ class DefenseManager {
             this.animateSpacecraftToIntercept(interceptPoint, asteroid);
         } else {
             // Fallback: trigger deflection immediately
-            console.log('🎯 Fallback: triggering deflection immediately');
+            // Fallback: triggering deflection immediately
             this.triggerDeflection(asteroid);
             this.removeSpacecraft();
         }
@@ -195,7 +195,7 @@ class DefenseManager {
     
     launchSpacecraft(asteroid, targetPoint) {
         if (!this.isDefenseEnabled) {
-            console.log('🛡️ Defense not enabled, skipping spacecraft launch');
+            // Defense not enabled, skipping spacecraft launch
             return false;
         }
         
@@ -204,7 +204,7 @@ class DefenseManager {
             this.removeSpacecraft();
         }
         
-        console.log('🚀 Launching DART spacecraft to intercept asteroid');
+        // Launching DART spacecraft to intercept asteroid
         
         // Create spacecraft
         this.spacecraft = this.createSpacecraft();
@@ -217,16 +217,16 @@ class DefenseManager {
         const targetDirection = targetPoint.clone().normalize();
         const launchPosition = targetDirection.clone().multiplyScalar(launchDistance);
         
-        console.log('🚀 Launch position calculated:', launchPosition);
-        console.log('☄️ Asteroid position:', asteroid.position);
-        console.log('🎯 Target point:', targetPoint);
-        console.log('📏 Distance from asteroid to launch:', launchPosition.distanceTo(asteroid.position).toFixed(2));
+        // Launch position calculated
+        // Asteroid position
+        // Target point
+        // Distance from asteroid to launch
         
         // Calculate intercept trajectory
         const interceptPoint = this.calculateInterceptPoint(asteroid, launchPosition);
         
         if (!interceptPoint) {
-            console.warn('⚠️ Could not calculate intercept point');
+            // Could not calculate intercept point
             this.scene.remove(this.spacecraft);
             this.spacecraft = null;
             return false;
@@ -318,13 +318,13 @@ class DefenseManager {
             
             // Check if we can reach this point in time
             if (timeToReach <= timeOffset + 5) { // Allow some buffer
-                console.log(`🎯 Intercept found: time ${timeOffset}, distance ${distanceFromLaunch.toFixed(2)}`);
+                // Intercept found
                 return interceptPoint;
             }
         }
         
         // Fallback: aim directly at asteroid
-        console.log(`🎯 Fallback: aiming directly at asteroid`);
+        // Fallback: aiming directly at asteroid
         return asteroidPosition.clone();
     }
     
@@ -338,7 +338,7 @@ class DefenseManager {
         const distanceFactor = Math.min(distance / 10, 1.5); // Scale up to 1.5x for longer distances
         const duration = baseDuration + (distanceFactor * 300); // Add up to 0.5 seconds for long distances
         
-        console.log(`🚀 Spacecraft animation: distance ${distance.toFixed(2)}, duration ${duration}ms`);
+        // Spacecraft animation
         
         const animate = () => {
             if (!this.spacecraft || !this.spacecraft.parent) return;
@@ -368,13 +368,13 @@ class DefenseManager {
             
             // Debug: Log distance every few frames
             if (Math.floor(elapsed / 100) % 5 === 0) {
-                console.log(`🚀 Animation collision check: ${distanceToAsteroid.toFixed(3)} (threshold: 0.7)`);
+                // Animation collision check
             }
             
             if (distanceToAsteroid < 0.7) { // Even larger collision threshold
-                console.log('💥 DART spacecraft collision detected! Distance:', distanceToAsteroid.toFixed(3));
-                console.log('🚀 Spacecraft pos:', this.spacecraft.position);
-                console.log('☄️ Asteroid pos:', asteroid.position);
+                // DART spacecraft collision detected
+                // Spacecraft position
+                // Asteroid position
                 this.triggerDeflection(asteroid);
                 this.removeSpacecraft();
                 return;
@@ -388,7 +388,7 @@ class DefenseManager {
             const distanceToPath = this.spacecraft.position.distanceTo(closestPoint);
             
             if (distanceToPath < 0.5) {
-                console.log('🎯 Spacecraft very close to asteroid path - forcing collision!');
+                // Spacecraft very close to asteroid path - forcing collision
                 this.triggerDeflection(asteroid);
                 this.removeSpacecraft();
                 return;

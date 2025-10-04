@@ -35,7 +35,7 @@ class GlobeApp {
         this.isRunning = true;
         this.animate();
         this.loadAsteroidInfoOnStartup();
-        console.log('🌍 Simple Three.js Globe loaded successfully!');
+
     }
     
     loadAsteroidInfoOnStartup() {
@@ -104,7 +104,7 @@ class GlobeApp {
     
     spawnAsteroidToTarget(targetPoint) {
         if (!targetPoint) {
-            console.log('⚠️ No target point selected! Click on the globe first.');
+            // No target point selected
             return;
         }
         
@@ -132,19 +132,9 @@ class GlobeApp {
         // Verify trajectory accuracy
         const trajectoryCheck = asteroid.position.clone().add(direction.clone().multiplyScalar(20));
         const trajectoryDistanceFromCenter = trajectoryCheck.length();
-        console.log('🎯 Trajectory verification:');
-        console.log('  📍 Spawn:', asteroid.position);
-        console.log('  📍 Target:', targetPoint);
-        console.log('  📐 Direction:', direction);
-        console.log('  🔍 20 units ahead:', trajectoryCheck);
-        console.log('  📏 Trajectory distance from center:', trajectoryDistanceFromCenter);
         
         // Calculate expected impact point
         const expectedImpactPoint = this.calculateExpectedImpactPoint(asteroid.position, direction, targetPoint);
-        console.log('🎯 Expected impact point:', expectedImpactPoint);
-        console.log('📏 Distance from target:', expectedImpactPoint.distanceTo(targetPoint));
-        
-        // No randomness - perfect targeting
         
         // Use custom speed from configuration
         const speed = asteroidConfig.speed * 0.01; // Convert km/s to scene units
@@ -176,29 +166,22 @@ class GlobeApp {
         if (this.defenseManager.isDefenseActive()) {
             const dartDeployed = this.defenseManager.deployDARTAboveTarget(targetPoint);
             if (dartDeployed) {
-                console.log('🛡️ DART spacecraft deployed above target!');
+                // DART spacecraft deployed above target
                 // Change asteroid target to DART spacecraft position
                 asteroid.userData.targetPoint = this.defenseManager.spacecraft.position.clone();
-                console.log('🎯 Asteroid target changed to DART spacecraft at:', asteroid.userData.targetPoint);
+                // Asteroid target changed to DART spacecraft
                 
                 // Recalculate asteroid velocity to point toward DART
                 const directionToDART = new THREE.Vector3().subVectors(asteroid.userData.targetPoint, asteroid.position).normalize();
                 const speed = asteroid.userData.velocity.length();
                 asteroid.userData.velocity = directionToDART.multiplyScalar(speed);
-                console.log('🚀 Asteroid velocity updated to point toward DART');
+                // Asteroid velocity updated to point toward DART
             }
         }
         
         // Update asteroid info display
         this.updateAsteroidInfoDisplay(asteroidConfig);
         
-        console.log(`☄️ Custom asteroid "${asteroidConfig.name}" launched toward target!`);
-        console.log('🎯 Target point:', targetPoint);
-        console.log('📏 Target distance from center:', targetPoint.length());
-        console.log('🚀 Spawn position:', asteroid.position);
-        console.log('📏 Spawn distance from center:', asteroid.position.length());
-        console.log('📐 Direction vector:', direction);
-        console.log('🌍 Earth radius: 2.0, Collision at: 2.1');
     }
     
     getCustomAsteroidConfig() {
@@ -207,10 +190,10 @@ class GlobeApp {
         if (storedConfig) {
             try {
                 const config = JSON.parse(storedConfig);
-                console.log('🎯 Using custom asteroid config:', config);
+                // Using custom asteroid config
                 return config;
             } catch (error) {
-                console.warn('⚠️ Failed to parse stored asteroid config:', error);
+                // Failed to parse stored asteroid config
             }
         }
         
@@ -424,7 +407,7 @@ class GlobeApp {
             this.sceneManager.getScene().remove(asteroid);
         });
         this.asteroids = [];
-        console.log('🗑️ All asteroids cleared!');
+        // All asteroids cleared
     }
     
     updateAsteroids() {
@@ -452,7 +435,7 @@ class GlobeApp {
             if (distanceFromCenter <= 4) {
                 // Check if asteroid was deflected by defense system
                 if (asteroid.userData.wasDeflected) {
-                    console.log('🛡️ Asteroid was successfully deflected! Moving away from Earth.');
+                    // Asteroid was successfully deflected
                     // Continue with deflected trajectory - don't trigger impact
                     return;
                 }
@@ -462,7 +445,7 @@ class GlobeApp {
                 if (targetPoint) {
                     // Check if we're already animating to target
                     if (!asteroid.userData.isAnimatingToTarget) {
-                        console.log('🎬 Starting animation at distance:', distanceFromCenter);
+                        // Starting animation
                         // Start smooth movement animation to target
                         asteroid.userData.isAnimatingToTarget = true;
                         asteroid.userData.animationStartTime = Date.now();
@@ -477,7 +460,7 @@ class GlobeApp {
                         
                         // Debug progress every 20% to see if animation is working
                         if (Math.floor(progress * 5) !== Math.floor((progress - 0.001) * 5)) {
-                            console.log(`🎬 Animation progress: ${Math.floor(progress * 100)}%`);
+                            // Animation progress tracking
                         }
                         
                         
@@ -493,15 +476,15 @@ class GlobeApp {
                         
                         // Check if animation is complete (use >= 0.8 since it gets stuck at 80%)
                         if (progress >= 0.8) {
-                            console.log('🎬 Animation complete - calling handleImpact');
+                            // Animation complete
                             this.handleImpact(asteroid, i);
                         }
                     }
                 } else {
                     // Fallback to instant impact if no target
-                    console.log('💥 Impact detected!');
-                    console.log('📍 Impact position:', asteroid.position);
-                    console.log('📏 Distance from center:', asteroid.position.length());
+                    // Impact detected
+                    // Impact position logged
+                    // Distance from center logged
                     this.handleImpact(asteroid, i);
                 }
             }
@@ -566,13 +549,13 @@ class GlobeApp {
     }
     
     handleImpact(asteroid, index) {
-        console.log('🔥 IMPACT TRIGGERED!');
+        // Impact triggered
         // Show impact marker circle (the original impact circle)
         if (this.controlsManager && this.controlsManager.showImpactMarker) {
-            console.log('🎯 Calling showImpactMarker');
+            // Calling showImpactMarker
             this.controlsManager.showImpactMarker(asteroid.position);
         } else {
-            console.log('❌ controlsManager or showImpactMarker not available');
+            // Controls manager not available
         }
         
         // Create realistic explosion effect
@@ -594,7 +577,7 @@ class GlobeApp {
         // this.globeManager.startEarthRotation();
         // this.controlsManager.startAutoRotation();
         
-        console.log('💥 Realistic asteroid impact!');
+        // Realistic asteroid impact occurred
     }
     
     createRealisticExplosion(position) {
