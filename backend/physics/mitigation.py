@@ -108,9 +108,9 @@ class MitigationStrategies:
             Dictionary with mission results
         """
         if impactor_mass_kg is None:
-            impactor_mass_kg = MitigationStrategies.TYPICAL_IMPACTOR_MASS_KG
+            impactor_mass_kg = TYPICAL_IMPACTOR_MASS_KG
         if impactor_velocity_ms is None:
-            impactor_velocity_ms = MitigationStrategies.TYPICAL_IMPACTOR_VELOCITY_KMS * 1000
+            impactor_velocity_ms = TYPICAL_IMPACTOR_VELOCITY_KMS * 1000
         
         # Impact angle correction
         angle_rad = np.radians(impact_angle_degrees)
@@ -245,17 +245,17 @@ class MitigationStrategies:
         # Determine detonation type
         if subsurface_depth_m is not None:
             detonation_type = 'subsurface'
-            momentum_enhancement = MitigationStrategies.MOMENTUM_TRANSFER_EFFICIENCY['nuclear_subsurface']
+            momentum_enhancement = MOMENTUM_TRANSFER_EFFICIENCY['nuclear_subsurface']
             # For subsurface, effective distance is burial depth
             effective_distance_m = subsurface_depth_m
         elif detonation_distance_m is not None:
             detonation_type = 'standoff'
-            momentum_enhancement = MitigationStrategies.MOMENTUM_TRANSFER_EFFICIENCY['nuclear_standoff']
+            momentum_enhancement = MOMENTUM_TRANSFER_EFFICIENCY['nuclear_standoff']
             effective_distance_m = detonation_distance_m
         else:
             # Default to standoff at 1 asteroid radius
             detonation_type = 'standoff'
-            momentum_enhancement = MitigationStrategies.MOMENTUM_TRANSFER_EFFICIENCY['nuclear_standoff']
+            momentum_enhancement = MOMENTUM_TRANSFER_EFFICIENCY['nuclear_standoff']
             effective_distance_m = asteroid_diameter_m / 2
         
         # Energy coupling efficiency (depends on detonation type and distance)

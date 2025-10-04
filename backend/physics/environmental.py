@@ -18,10 +18,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.conversions import UnitConverter, validate_coordinates
 from config.constants import (
-    EARTH_RADIUS_M, OCEAN_DEPTH_AVG_M, SEISMIC_WAVE_VELOCITY_MS,
+    EARTH_RADIUS_M, EARTH_RADIUS_KM, OCEAN_DEPTH_AVG_M, SEISMIC_WAVE_VELOCITY_MS,
     TSUNAMI_WAVE_VELOCITY_MS, TSUNAMI_EFFICIENCY_OCEAN, TSUNAMI_EFFICIENCY_LAND,
     TSUNAMI_DISSIPATION_LENGTH_KM, MMI_THRESHOLDS
 )
+from physics.impact import ImpactPhysics
 
 
 class EnvironmentalEffects:
@@ -95,7 +96,7 @@ class EnvironmentalEffects:
             Dictionary with tsunami characteristics
         """
         if water_depth_m is None:
-            water_depth_m = EnvironmentalEffects.OCEAN_DEPTH_AVG_M
+            water_depth_m = OCEAN_DEPTH_AVG_M
         
         # Estimate crater diameter if not provided
         if crater_diameter_m is None:
@@ -167,7 +168,7 @@ class EnvironmentalEffects:
             Dictionary with wave properties vs distance
         """
         if bathymetry_m is None:
-            bathymetry_m = np.full_like(distances_km, EnvironmentalEffects.OCEAN_DEPTH_AVG_M)
+            bathymetry_m = np.full_like(distances_km, OCEAN_DEPTH_AVG_M)
         
         # Initial conditions
         initial_amplitude_m = tsunami_params['initial_amplitude_m']
@@ -267,7 +268,7 @@ class EnvironmentalEffects:
             results['distances_km'].append(distance_km)
             
             # P-wave travel time (simplified)
-            travel_time_s = (distance_km * 1000) / EnvironmentalEffects.SEISMIC_WAVE_VELOCITY_MS
+            travel_time_s = (distance_km * 1000) / SEISMIC_WAVE_VELOCITY_MS
             results['travel_times_s'].append(travel_time_s)
             
             # Peak ground acceleration (simplified attenuation)
