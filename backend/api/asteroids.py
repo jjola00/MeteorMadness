@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime, timedelta
-from clients.nasa_api import nasa_api_client
-from services.asteroid_service import (
+from backend.clients.nasa_api import nasa_api_client
+from backend.services.asteroid_service import (
     get_cached_asteroids, 
     find_asteroid_in_cache, 
     get_complete_asteroid_data
 )
-from services.elevation_service import get_impact_context
+from backend.services.elevation_service import get_impact_context
 
 asteroids_bp = Blueprint('asteroids', __name__)
 
@@ -147,3 +147,125 @@ def get_elevation_data():
     except Exception as e:
         # In a real app, you'd want to log the error e
         return jsonify({"error": "An internal server error occurred."}), 500
+
+
+@asteroids_bp.route('/simulate-impact', methods=['POST'])
+def simulate_impact():
+    """
+    Simulate asteroid impact with user-provided parameters.
+    This endpoint allows frontend users to test custom scenarios with sliders.
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required parameters
+        diameter_m = data.get('diameter_m')
+        velocity_kms = data.get('velocity_kms')
+        
+        if diameter_m is None or velocity_kms is None:
+            return jsonify({
+                "error": "diameter_m and velocity_kms are required parameters"
+            }), 400
+        
+        # Validate parameter ranges
+        if diameter_m <= 0 or diameter_m > 10000:
+            return jsonify({
+                "error": "diameter_m must be between 0 and 10000 meters"
+            }), 400
+            
+        if velocity_kms <= 0 or velocity_kms > 100:
+            return jsonify({
+                "error": "velocity_kms must be between 0 and 100 km/s"
+            }), 400
+        
+        # Optional parameters with defaults
+        impact_angle = data.get('impact_angle', 45.0)
+        impact_lat = data.get('impact_lat', 0.0)
+        impact_lng = data.get('impact_lng', 0.0)
+        
+        # Import physics modules
+        from backend.physics.impact import ImpactPhysics
+        from backend.utils.conversions import estimate_asteroid_mass
+        
+        # Convert velocity to m/s
+        velocity_ms = velocity_kms * 1000
+        
+        # Calculate impact results
+        results = ImpactPhysics.complete_impact_analysis(
+            diameter_m=diameter_m,
+            velocity_ms=velocity_ms,
+            impact_angle_degrees=impact_angle
+        )
+        
+        # Add input parameters to results for frontend reference
+        results["input_parameters"] = {
+            "diameter_m": diameter_m,
+            "velocity_kms": velocity_kms,
+            "velocity_ms": velocity_ms,
+            "impact_angle": impact_angle,
+            "impact_coordinates": {"lat": impact_lat, "lng": impact_lng}
+        }
+        
+        # Add estimated mass for reference
+        mass_kg = estimate_asteroid_mass(diameter_m)
+        results["estimated_mass_kg"] = mass_kg
+        
+        return jsonify(results), 200
+        
+    except ImportError as e:
+        return jsonify({
+            "error": f"Physics module not available: {str(e)}"
+        }), 500
+    except Exception as e:
+        return jsonify({
+            "error": f"Simulation failed: {str(e)}"
+        }), 500
+
+
+@asteroids_bp.route('/asteroid-parameters', methods=['GET'])
+def get_asteroid_parameters():
+    """
+    Get parameter ranges for frontend sliders based on cached asteroid data.
+    """
+    try:
+        diameters = []
+        velocities = []
+        
+        for asteroid in CACHED_ASTEROIDS:
+            # Collect diameter data
+            diameter_data = asteroid.get("diameter_meters", {})
+            if diameter_data:
+                if "estimated_diameter_min" in diameter_data:
+                    diameters.append(diameter_data["estimated_diameter_min"])
+                if "estimated_diameter_max" in diameter_data:
+                    diameters.append(diameter_data["estimated_diameter_max"])
+            
+            # Collect velocity data
+            velocity_kms = asteroid.get("velocity_kms")
+            if velocity_kms and isinstance(velocity_kms, (int, float)):
+                velocities.append(float(velocity_kms))
+        
+        return jsonify({
+            "diameter_range_m": {
+                "min": min(diameters) if diameters else 10,
+                "max": max(diameters) if diameters else 1000,
+                "count": len(diameters),
+                "data_source": "NASA cached asteroids"
+            },
+            "velocity_range_kms": {
+                "min": min(velocities) if velocities else 5,
+                "max": max(velocities) if velocities else 50,
+                "count": len(velocities),
+                "data_source": "NASA cached asteroids"
+            },
+            "recommended_defaults": {
+                "diameter_m": 100,
+                "velocity_kms": 20,
+                "impact_angle": 45,
+                "description": "Typical small asteroid parameters"
+            },
+            "total_asteroids": len(CACHED_ASTEROIDS)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to get parameters: {str(e)}"}), 500

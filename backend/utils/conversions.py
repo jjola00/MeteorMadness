@@ -268,10 +268,6 @@ def validate_coordinates(lat: float, lon: float) -> bool:
 
 # Import constants from config
 # TODO: When API integration is added, these constants can be made configurable
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config.constants import (
     EARTH_RADIUS_KM, EARTH_MASS_KG, GM_EARTH as GRAVITATIONAL_PARAMETER_EARTH,
     ESCAPE_VELOCITY_EARTH_MS, DEFAULT_ASTEROID_DENSITY

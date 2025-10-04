@@ -29,7 +29,7 @@ class BaseConfig(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
     
     # External API settings
-    NASA_NEO_API_KEY: Optional[str] = None
+    NASA_API_KEY: Optional[str] = None
     NASA_NEO_BASE_URL: str = "https://api.nasa.gov/neo/rest/v1"
     USGS_API_BASE_URL: str = "https://earthquake.usgs.gov/fdsnws"
     WORLDPOP_API_BASE_URL: str = "https://www.worldpop.org/rest"
@@ -94,7 +94,7 @@ class TestingConfig(BaseConfig):
     DATABASE_URL: str = "sqlite:///:memory:"
     
     # Disable external API calls in testing
-    NASA_NEO_API_KEY: Optional[str] = "test_key"
+    NASA_API_KEY: Optional[str] = "test_key"
 
 
 class ProductionConfig(BaseConfig):
@@ -114,11 +114,11 @@ class ProductionConfig(BaseConfig):
             raise ValueError("SECRET_KEY must be at least 32 characters in production")
         return v
     
-    @field_validator("NASA_NEO_API_KEY")
+    @field_validator("NASA_API_KEY")
     def validate_nasa_api_key_in_production(cls, v):
         """Ensure NASA API key is set in production."""
         if not v:
-            raise ValueError("NASA_NEO_API_KEY is required in production")
+            raise ValueError("NASA_API_KEY is required in production")
         return v
 
 
