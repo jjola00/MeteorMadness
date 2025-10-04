@@ -3,6 +3,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
+
+from backend.api.game import game_bp
 from backend.api.health import health_bp
 from backend.api.asteroids import asteroids_bp
 from backend.utils.errors import handle_error
@@ -44,6 +46,9 @@ def create_app():
     # Register Blueprints
     app.register_blueprint(health_bp, url_prefix='/api')
     app.register_blueprint(asteroids_bp, url_prefix='/api')
+    
+    # Game mode endpoints - separate from simulation
+    app.register_blueprint(game_bp, url_prefix='/api')
 
     # Register error handlers
     app.register_error_handler(Exception, handle_error)
