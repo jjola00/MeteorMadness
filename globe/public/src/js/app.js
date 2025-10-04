@@ -590,9 +590,9 @@ class GlobeApp {
         this.sceneManager.getScene().remove(asteroid);
         this.asteroids.splice(index, 1);
         
-        // Resume Earth rotation and camera auto-rotation after impact
-        this.globeManager.startEarthRotation();
-        this.controlsManager.startAutoRotation();
+        // Keep Earth rotation and camera auto-rotation disabled after impact
+        // this.globeManager.startEarthRotation();
+        // this.controlsManager.startAutoRotation();
         
         console.log('💥 Realistic asteroid impact!');
     }

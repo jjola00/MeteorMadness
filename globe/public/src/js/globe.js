@@ -8,7 +8,7 @@ class GlobeManager {
         this.globe = null;
         this.atmosphere = null;
         this.stars = null;
-        this.isRotating = true; // Earth rotation state
+        this.isRotating = false; // Earth rotation state
         this.rotationSpeed = 0.002; // Earth rotation speed
         
         this.init();

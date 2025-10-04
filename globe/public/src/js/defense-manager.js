@@ -162,7 +162,7 @@ class DefenseManager {
                         const distanceToDART = asteroid.position.distanceTo(this.spacecraft.position);
                         
                         // If asteroid collides with DART, trigger deflection
-                        if (distanceToDART < 0.5) { // Collision threshold
+                        if (distanceToDART < 0.1) { // Collision threshold
                             console.log('💥 Asteroid collided with stationary DART!');
                             asteroid.userData.hasCollidedWithDART = true;
                             this.triggerDeflection(asteroid);
@@ -510,13 +510,13 @@ class DefenseManager {
                 asteroid.parent.remove(asteroid);
                 console.log('🌌 Deflected asteroid has left the scene');
                 
-                // Resume Earth rotation and camera auto-rotation after successful deflection
-                if (window.globeApp && window.globeApp.globeManager) {
-                    window.globeApp.globeManager.startEarthRotation();
-                }
-                if (window.globeApp && window.globeApp.controlsManager) {
-                    window.globeApp.controlsManager.startAutoRotation();
-                }
+                // Keep Earth rotation and camera auto-rotation disabled after successful deflection
+                // if (window.globeApp && window.globeApp.globeManager) {
+                //     window.globeApp.globeManager.startEarthRotation();
+                // }
+                // if (window.globeApp && window.globeApp.controlsManager) {
+                //     window.globeApp.controlsManager.startAutoRotation();
+                // }
                 return;
             }
             

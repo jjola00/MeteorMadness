@@ -26,7 +26,7 @@ class ControlsManager {
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.controls.autoRotate = true;
+        this.controls.autoRotate = false;
         this.controls.autoRotateSpeed = 0.5;
         this.controls.enableZoom = true;
         this.controls.minDistance = 3;
