@@ -103,6 +103,11 @@ class ControlsManager {
                 this.selectedImpactPoint = intersection.point.clone();
                 this.showImpactMarker(this.selectedImpactPoint);
                 
+                // Enable defense button when target is selected
+                if (window.globeApp?.defenseManager) {
+                    window.globeApp.defenseManager.enableDefenseButton();
+                }
+                
                 console.log('🎯 Target selected:', this.selectedImpactPoint);
                 console.log('📏 Target distance from center:', this.selectedImpactPoint.length());
                 console.log('🌍 Earth radius: 2.0');

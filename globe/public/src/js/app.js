@@ -8,6 +8,7 @@ class GlobeApp {
         this.globeManager = null;
         this.lightingManager = null;
         this.controlsManager = null;
+        this.defenseManager = null;
         this.asteroids = [];
         this.isRunning = false;
         
@@ -21,6 +22,10 @@ class GlobeApp {
         this.controlsManager = new ControlsManager(
             this.sceneManager.getCamera(),
             this.sceneManager.getRenderer()
+        );
+        this.defenseManager = new DefenseManager(
+            this.sceneManager.getScene(),
+            this.sceneManager.getCamera()
         );
         
         this.start();
@@ -88,6 +93,9 @@ class GlobeApp {
         
         // Update controls
         this.controlsManager.update();
+        
+        // Update defense system
+        this.defenseManager.update();
         
         // Render the scene
         this.sceneManager.render();
@@ -158,6 +166,14 @@ class GlobeApp {
         
         this.sceneManager.getScene().add(asteroid);
         this.asteroids.push(asteroid);
+        
+        // Launch defense spacecraft if defense is enabled
+        if (this.defenseManager.isDefenseActive()) {
+            const defenseLaunched = this.defenseManager.launchSpacecraft(asteroid, targetPoint);
+            if (defenseLaunched) {
+                console.log('🛡️ DART defense spacecraft launched!');
+            }
+        }
         
         // Update asteroid info display
         this.updateAsteroidInfoDisplay(asteroidConfig);
@@ -420,6 +436,13 @@ class GlobeApp {
             // Check collision with Earth surface
             const distanceFromCenter = asteroid.position.length();
             if (distanceFromCenter <= 4) {
+                // Check if asteroid was deflected by defense system
+                if (asteroid.userData.wasDeflected) {
+                    console.log('🛡️ Asteroid was successfully deflected! Moving away from Earth.');
+                    // Continue with deflected trajectory - don't trigger impact
+                    return;
+                }
+                
                 // Ensure impact happens exactly at target point
                 const targetPoint = asteroid.userData.targetPoint;
                 if (targetPoint) {

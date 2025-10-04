@@ -22,6 +22,16 @@
             <div class="control-item">⚙️ <strong><a href="asteroid-config.html" style="color: #ff6600; text-decoration: none;">Configure Custom Asteroid</a></strong></div>
         </div>
         
+        <!-- Defense Controls -->
+        <div id="defenseControls">
+            <button id="defenseButton" class="defense-button" disabled>
+                🛡️ Enable DART Defense
+            </button>
+            <div class="defense-status" id="defenseStatus">
+                Defense: <span id="defenseStatusText">Disabled</span>
+            </div>
+        </div>
+        
         <!-- Asteroid Info Panel -->
         <div id="asteroidInfo">
             <h3>🚀 Current Asteroid</h3>
@@ -51,6 +61,7 @@
     <script src="src/js/globe.js"></script>
     <script src="src/js/lighting.js"></script>
     <script src="src/js/controls.js"></script>
+    <script src="src/js/defense-manager.js"></script>
     <script src="src/js/app.js"></script>
 </body>
 </html>
