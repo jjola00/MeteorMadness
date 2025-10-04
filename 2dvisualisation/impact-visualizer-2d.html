@@ -48,6 +48,18 @@
 
             <div class="panel-section">
                 <h3>Scenarios</h3>
+
+                <!-- Backend Data Toggle -->
+                <div class="data-source-toggle" style="margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                        <input type="checkbox" id="useBackendToggle" checked onchange="toggleDataSource()">
+                        <span>Use Real Physics Backend</span>
+                    </label>
+                    <div id="dataSourceStatus" style="font-size: 12px; color: #666; margin-top: 4px;">
+                        ✅ Connected to environmental effects API
+                    </div>
+                </div>
+
                 <div class="scenario-selector">
                     <button class="scenario-btn active" onclick="loadScenarioWrapper('tunguska', this)">Tunguska Event
                         (1908)</button>
@@ -1181,6 +1193,31 @@
             }
 
             return (isNegative ? 'T-' : 'T+') + timeStr;
+        }
+
+        // Toggle between backend and hardcoded data
+        function toggleDataSource() {
+            const toggle = document.getElementById('useBackendToggle');
+            const status = document.getElementById('dataSourceStatus');
+
+            if (window.visualizer) {
+                window.visualizer.useBackendData = toggle.checked;
+
+                if (toggle.checked) {
+                    status.innerHTML = '✅ Using real physics backend';
+                    status.style.color = '#4CAF50';
+                } else {
+                    status.innerHTML = '⚠️ Using hardcoded sample data';
+                    status.style.color = '#FF9800';
+                }
+
+                // Reload current scenario with new data source
+                const activeButton = document.querySelector('.scenario-btn.active');
+                if (activeButton) {
+                    const scenarioId = activeButton.onclick.toString().match(/'([^']+)'/)[1];
+                    window.visualizer.loadScenario(scenarioId);
+                }
+            }
         }
 
         // Wrapper function for scenario loading to handle button context

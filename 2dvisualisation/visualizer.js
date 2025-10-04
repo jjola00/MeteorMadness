@@ -1,7 +1,8 @@
 // Main visualizer logic for asteroid impact simulation
 
-import { impactScenarios } from './scenarios.js';
+import { scenarioMetadata, impactScenarios } from './scenarios.js';
 import { TimelineController } from './timeline.js';
+import { EnvironmentalEffectsAPI } from './api-client.js';
 
 export class ImpactVisualizer {
     constructor() {
@@ -15,13 +16,16 @@ export class ImpactVisualizer {
         };
         this.currentScenario = 'tunguska';
         this.timeline = new TimelineController();
+        this.api = new EnvironmentalEffectsAPI();
+        this.currentBackendData = null;
+        this.useBackendData = true; // Flag to switch between backend and hardcoded data
     }
 
     initialize() {
         this.initMap();
         this.timeline.initialize();
         this.timeline.onTimeChange(() => this.updateVisualization());
-        
+
         setTimeout(() => {
             this.loadScenario('tunguska');
         }, 100);
@@ -40,11 +44,80 @@ export class ImpactVisualizer {
         });
     }
 
-    loadScenario(scenarioId) {
+    async loadScenario(scenarioId) {
+        if (this.useBackendData) {
+            await this.loadScenarioFromBackend(scenarioId);
+        } else {
+            this.loadScenarioFromHardcodedData(scenarioId);
+        }
+    }
+
+    async loadScenarioFromBackend(scenarioId) {
+        try {
+            // Show loading indicator
+            this.showLoadingIndicator();
+
+            // Get scenario metadata
+            const metadata = scenarioMetadata[scenarioId];
+            if (!metadata) {
+                throw new Error(`Unknown scenario: ${scenarioId}`);
+            }
+
+            const params = metadata.backendParams;
+
+            // Get sample scenario from backend
+            const backendScenario = await this.api.getSampleScenario(params.scenario, params.location);
+
+            // Store backend data
+            this.currentBackendData = backendScenario.temporal_effects;
+            this.currentScenario = scenarioId;
+
+            // Update scenario info with real data
+            const impactAnalysis = backendScenario.impact_analysis;
+            const energyKt = impactAnalysis.impact_energy?.effective_energy_tnt_kt || 0;
+            const craterKm = impactAnalysis.crater?.diameter_km || 0;
+
+            document.getElementById('event-name').textContent = metadata.name;
+            document.getElementById('event-energy').textContent = `${energyKt.toFixed(1)} kt TNT`;
+            document.getElementById('event-casualties').textContent = 'Calculating...'; // Will be updated with real casualty data
+            document.getElementById('event-crater').textContent = craterKm > 0 ? `${craterKm.toFixed(1)} km diameter` : 'Airburst (no crater)';
+
+            // Center map on impact location (use real backend location, not historical)
+            const location = this.currentBackendData.impact_location;
+            this.map.setView([location.lat, location.lon], metadata.defaultZoom);
+
+            // Update timeline with real temporal data
+            const timeHours = this.currentBackendData.time_hours;
+            const duration = Math.max(...timeHours) * 3600; // Convert hours to seconds
+            this.timeline.setDuration(duration);
+
+            // Create timeline markers from real data
+            const markers = this.generateTimelineMarkers(timeHours, backendScenario);
+            this.timeline.updateMarkers({ markers });
+
+            // Hide loading indicator
+            this.hideLoadingIndicator();
+
+            // Render visualization with real data
+            this.updateVisualization();
+
+        } catch (error) {
+            console.error('Error loading scenario from backend:', error);
+            this.hideLoadingIndicator();
+
+            // Fallback to hardcoded data
+            console.log('Falling back to hardcoded data...');
+            this.useBackendData = false;
+            this.loadScenarioFromHardcodedData(scenarioId);
+        }
+    }
+
+    loadScenarioFromHardcodedData(scenarioId) {
         const scenario = impactScenarios[scenarioId];
         if (!scenario) return;
 
         this.currentScenario = scenarioId;
+        this.currentBackendData = null;
 
         // Update scenario info
         document.getElementById('event-name').textContent = scenario.name;
@@ -63,7 +136,85 @@ export class ImpactVisualizer {
         this.updateVisualization();
     }
 
+    generateTimelineMarkers(timeHours, backendScenario) {
+        const markers = [];
+        const maxTime = Math.max(...timeHours);
+
+        // Add key timeline markers based on the data
+        markers.push({ time: 0, label: "Impact", phase: "Impact" });
+
+        if (maxTime >= 1) {
+            markers.push({ time: 3600, label: "1 Hour", phase: "Immediate Effects" });
+        }
+        if (maxTime >= 24) {
+            markers.push({ time: 86400, label: "Day 1", phase: "Assessment" });
+        }
+        if (maxTime >= 72) {
+            markers.push({ time: 259200, label: "Day 3", phase: "Recovery" });
+        }
+        if (maxTime >= 168) {
+            markers.push({ time: 604800, label: "Week 1", phase: "Reconstruction" });
+        }
+
+        return markers;
+    }
+
+    showLoadingIndicator() {
+        // Add loading indicator to the UI
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'loading-indicator';
+        loadingDiv.innerHTML = `
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 5px; z-index: 10000;">
+                <div>Loading environmental effects data...</div>
+                <div style="margin-top: 10px; text-align: center;">⏳</div>
+            </div>
+        `;
+        document.body.appendChild(loadingDiv);
+    }
+
+    hideLoadingIndicator() {
+        const loadingDiv = document.getElementById('loading-indicator');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+    }
+
     updateVisualization() {
+        if (this.currentBackendData) {
+            this.updateVisualizationFromBackend();
+        } else {
+            this.updateVisualizationFromHardcodedData();
+        }
+    }
+
+    updateVisualizationFromBackend() {
+        if (!this.currentBackendData) return;
+
+        // Calculate current time index
+        const timeHours = this.currentBackendData.time_hours;
+        const currentTimeHours = this.timeline.currentTime / 3600; // Convert seconds to hours
+        const timeIndex = this.findClosestTimeIndex(timeHours, currentTimeHours);
+
+        // Generate map layers from backend data
+        const mapLayers = this.api.generateMapLayers(this.currentBackendData, timeIndex);
+
+        // Render the layers
+        this.clearLayers();
+        this.renderBlastZones(mapLayers.blast);
+        this.renderSeismicZones(mapLayers.seismic);
+        this.renderThermalZones(mapLayers.thermal);
+        this.renderPopulationDensity(mapLayers.population);
+
+        if (mapLayers.crater) {
+            this.renderCrater(mapLayers.crater);
+        }
+
+        // Update real-time data display with backend data
+        this.updateRealtimeDataFromBackend(timeIndex);
+    }
+
+    updateVisualizationFromHardcodedData() {
         const scenario = impactScenarios[this.currentScenario];
         if (!scenario) return;
 
@@ -75,6 +226,60 @@ export class ImpactVisualizer {
             this.renderTemporalVisualization(scenario, interpolatedData);
             this.updateRealtimeData(interpolatedData);
         }
+    }
+
+    findClosestTimeIndex(timeHours, targetTime) {
+        let closestIndex = 0;
+        let minDiff = Math.abs(timeHours[0] - targetTime);
+
+        for (let i = 1; i < timeHours.length; i++) {
+            const diff = Math.abs(timeHours[i] - targetTime);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex;
+    }
+
+    updateRealtimeDataFromBackend(timeIndex) {
+        if (!this.currentBackendData || !this.currentBackendData.effects) return;
+
+        const effects = this.currentBackendData.effects;
+        const data = {};
+
+        // Extract seismic data
+        if (effects.seismic && effects.seismic.intensity_grid[timeIndex]) {
+            const intensities = effects.seismic.intensity_grid[timeIndex];
+            data.seismicIntensity = Math.max(...intensities);
+        }
+
+        // Extract atmospheric data
+        if (effects.atmospheric && effects.atmospheric.timeline[timeIndex]) {
+            const atmData = effects.atmospheric.timeline[timeIndex];
+            data.airQuality = atmData.air_quality_index || 50;
+            data.temperatureChange = atmData.temperature_change_c || 0;
+        }
+
+        // Extract thermal data
+        if (effects.thermal && effects.thermal.timeline[timeIndex]) {
+            const thermalData = effects.thermal.timeline[timeIndex];
+            data.thermalRadius = thermalData.thermal_radius_km || 0;
+        }
+
+        // Extract infrastructure data
+        if (effects.infrastructure && effects.infrastructure.timeline[timeIndex]) {
+            const infraData = effects.infrastructure.timeline[timeIndex];
+            data.infrastructureDamage = Math.max(
+                infraData.severe_damage_radius_km || 0,
+                infraData.moderate_damage_radius_km || 0,
+                infraData.light_damage_radius_km || 0
+            ) / 10; // Convert to percentage (rough approximation)
+        }
+
+        // Update the real-time data display
+        this.updateRealtimeData(data);
     }
 
     renderStaticVisualization(impactData) {
@@ -275,7 +480,7 @@ export class ImpactVisualizer {
 
         const colorMap = colors[effectType] || colors.blast;
         const intensities = Object.keys(colorMap).map(Number).sort((a, b) => b - a);
-        
+
         for (let i of intensities) {
             if (intensity >= i) {
                 return colorMap[i];
@@ -377,7 +582,7 @@ export class ImpactVisualizer {
 
         element.textContent = value.toFixed(1);
         element.className = 'data-value';
-        
+
         if (value >= 7.0) {
             element.classList.add('critical');
         } else if (value >= 4.0) {
@@ -393,7 +598,7 @@ export class ImpactVisualizer {
 
         element.textContent = this.formatNumber(value);
         element.className = 'data-value';
-        
+
         if (value > 1000000) {
             element.classList.add('critical');
         } else if (value > 1000) {
@@ -436,7 +641,7 @@ export class ImpactVisualizer {
 
         element.textContent = `+${value.toFixed(1)}°C`;
         element.className = 'data-value';
-        
+
         if (value > 50) {
             element.classList.add('critical');
         } else if (value > 10) {
@@ -477,7 +682,7 @@ export class ImpactVisualizer {
 
         element.textContent = `${value} km/h`;
         element.className = 'data-value';
-        
+
         if (value > 200) {
             element.classList.add('critical');
         } else if (value > 50) {
@@ -519,7 +724,7 @@ export class ImpactVisualizer {
         const remaining = 100 - value;
         element.textContent = `${remaining}%`;
         element.className = 'data-value';
-        
+
         if (remaining < 20) {
             element.classList.add('critical');
         } else if (remaining < 50) {

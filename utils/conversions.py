@@ -6,8 +6,6 @@ across NASA API data, USGS datasets, and user inputs.
 
 import numpy as np
 from typing import Union, Dict, Any
-from astropy import units as u
-from astropy import constants as const
 
 
 class UnitConverter:
