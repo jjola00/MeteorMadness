@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, Optional, Any
-from services.game.progression import get_level_from_kills
+from backend.services.game.progression import get_level_from_kills
 
 class GameSession:
     """Manages the state of an individual game session."""
