@@ -96,7 +96,9 @@ export class ImpactVisualizer {
             this.renderCrater(impactData.crater);
         }
 
-        this.addImpactMarker(impactData.blast[0].center);
+        if (Array.isArray(impactData.blast) && impactData.blast.length > 0 && impactData.blast[0]?.center) {
+            this.addImpactMarker(impactData.blast[0].center);
+        }
     }
 
     renderTemporalVisualization(scenario, temporalData) {
