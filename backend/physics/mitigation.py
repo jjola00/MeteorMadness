@@ -10,11 +10,6 @@ from scipy.optimize import minimize_scalar
 from typing import Dict, List, Tuple, Optional, Union
 import warnings
 
-import sys
-import os
-# Add the parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from backend.utils.conversions import UnitConverter
 from config.constants import (
     EARTH_RADIUS_M, AU_M, TYPICAL_IMPACTOR_MASS_KG, TYPICAL_IMPACTOR_VELOCITY_KMS,
