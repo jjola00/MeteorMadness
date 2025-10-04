@@ -91,3 +91,6 @@ Thumbs.db
 
 # Cache files
 data/asteroids_cache.json
+# Application Logs
+logs/
+*.log
