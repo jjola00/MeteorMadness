@@ -122,6 +122,78 @@ body {
     font-size: 0.9em;
 }
 
+/* Defense Controls */
+#defenseControls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 150, 255, 0.3);
+    min-width: 200px;
+}
+
+.defense-button {
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #0066cc, #004499);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.defense-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0088ff, #0066cc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.defense-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.defense-button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.defense-button.enabled {
+    background: linear-gradient(135deg, #00cc66, #009944);
+    border: 2px solid #00ff88;
+}
+
+.defense-button.enabled:hover {
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+}
+
+.defense-status {
+    text-align: center;
+    font-size: 12px;
+    color: #ccc;
+}
+
+#defenseStatusText {
+    color: #ff6600;
+    font-weight: bold;
+}
+
+#defenseStatusText.enabled {
+    color: #00ff88;
+}
+
 
 @media (max-width: 768px) {
     #info, #controls, #asteroidInfo {

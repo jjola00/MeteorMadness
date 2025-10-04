@@ -103,6 +103,11 @@ class ControlsManager {
                 this.selectedImpactPoint = intersection.point.clone();
                 this.showImpactMarker(this.selectedImpactPoint);
                 
+                // Enable defense button when target is selected
+                if (window.globeApp?.defenseManager) {
+                    window.globeApp.defenseManager.enableDefenseButton();
+                }
+                
                 console.log('🎯 Target selected:', this.selectedImpactPoint);
                 console.log('📏 Target distance from center:', this.selectedImpactPoint.length());
                 console.log('🌍 Earth radius: 2.0');
@@ -296,6 +301,20 @@ class ControlsManager {
     update() {
         if (this.controls) {
             this.controls.update();
+        }
+    }
+    
+    stopAutoRotation() {
+        if (this.controls) {
+            this.controls.autoRotate = false;
+            console.log('📷 Camera auto-rotation stopped');
+        }
+    }
+    
+    startAutoRotation() {
+        if (this.controls) {
+            this.controls.autoRotate = true;
+            console.log('📷 Camera auto-rotation resumed');
         }
     }
 }
