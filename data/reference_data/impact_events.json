@@ -1,0 +1,82 @@
+{
+  "impacts": [
+    {
+      "name": "Tunguska Event",
+      "date": "1908-06-30",
+      "location": "Siberia, Russia",
+      "estimated_diameter_m": 60,
+      "estimated_energy_megatons": 10,
+      "crater_diameter_km": 0,
+      "airburst": true,
+      "casualties": 0,
+      "trees_felled_km2": 2000,
+      "description": "Largest impact event in recorded history, likely an airburst that flattened over 2,000 square kilometers of forest."
+    },
+    {
+      "name": "Chelyabinsk Meteor",
+      "date": "2013-02-15",
+      "location": "Chelyabinsk Oblast, Russia",
+      "estimated_diameter_m": 20,
+      "estimated_energy_megatons": 0.5,
+      "crater_diameter_km": 0,
+      "airburst": true,
+      "casualties": 1500,
+      "description": "A superbolide that exploded over Russia; its shockwave injured approximately 1,500 people, primarily from broken glass."
+    },
+    {
+      "name": "Chicxulub Impact",
+      "date": "66000000 BCE",
+      "location": "Yucatán Peninsula, Mexico",
+      "estimated_diameter_m": 10000,
+      "estimated_energy_megatons": 100000000,
+      "crater_diameter_km": 150,
+      "airburst": false,
+      "casualties": "dinosaur extinction",
+      "description": "The massive impact event linked to the Cretaceous–Paleogene extinction event, which wiped out the non-avian dinosaurs."
+    },
+    {
+      "name": "Barringer Crater (Meteor Crater)",
+      "date": "50000 BCE",
+      "location": "Arizona, USA",
+      "estimated_diameter_m": 50,
+      "estimated_energy_megatons": 10,
+      "crater_diameter_km": 1.2,
+      "airburst": false,
+      "casualties": 0,
+      "description": "One of the best-preserved impact craters on Earth, formed by a nickel-iron meteorite."
+    },
+    {
+      "name": "Hoba Meteorite",
+      "date": "80000 BCE",
+      "location": "Namibia",
+      "estimated_diameter_m": 3,
+      "estimated_energy_megatons": 0.05,
+      "crater_diameter_km": 0,
+      "airburst": false,
+      "casualties": 0,
+      "description": "The largest known intact meteorite on Earth. It did not form a crater, likely due to a low-angle entry and lower velocity."
+    },
+    {
+      "name": "Vredefort Crater",
+      "date": "2020000000 BCE",
+      "location": "Free State, South Africa",
+      "estimated_diameter_m": 10000,
+      "estimated_energy_megatons": 250000000,
+      "crater_diameter_km": 300,
+      "airburst": false,
+      "casualties": "global environmental changes",
+      "description": "The largest verified impact structure on Earth, so ancient that the crater has largely eroded away."
+    },
+    {
+      "name": "Manicouagan Crater",
+      "date": "214000000 BCE",
+      "location": "Quebec, Canada",
+      "estimated_diameter_m": 5000,
+      "estimated_energy_megatons": 10000000,
+      "crater_diameter_km": 100,
+      "airburst": false,
+      "casualties": "unknown",
+      "description": "One of the largest and best-preserved impact craters, now forming a distinctive ring-shaped lake."
+    }
+  ]
+}
