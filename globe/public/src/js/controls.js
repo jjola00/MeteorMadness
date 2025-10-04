@@ -146,8 +146,8 @@ class ControlsManager {
             window.globeApp.sceneManager.getScene().remove(this.impactMarker);
         }
         
-        // Create new impact marker - smaller and more precise
-        const markerGeometry = new THREE.SphereGeometry(0.05, 8, 6); // Smaller for precision
+        // Create new impact marker - much smaller and more precise
+        const markerGeometry = new THREE.SphereGeometry(0.02, 8, 6); // Much smaller for precision
         const markerMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
@@ -177,6 +177,9 @@ class ControlsManager {
         const duration = 2000;
         
         const animate = () => {
+            // Check if marker still exists before animating
+            if (!this.impactMarker) return;
+            
             const elapsed = Date.now() - startTime;
             const progress = elapsed / duration;
             

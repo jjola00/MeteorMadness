@@ -15,7 +15,6 @@ class GlobeApp {
     }
     
     init() {
-        // initialising all managers
         this.sceneManager = new SceneManager();
         this.globeManager = new GlobeManager(this.sceneManager.getScene());
         this.lightingManager = new LightingManager(this.sceneManager.getScene());
@@ -35,7 +34,6 @@ class GlobeApp {
     }
     
     loadAsteroidInfoOnStartup() {
-        // Load and display asteroid info immediately on page load
         const asteroidConfig = this.getCustomAsteroidConfig();
         if (asteroidConfig) {
             this.updateAsteroidInfoDisplay(asteroidConfig);
@@ -45,7 +43,6 @@ class GlobeApp {
     }
     
     showNoAsteroidConfiguredMessage() {
-        // Show message when no asteroid is configured
         const nameElement = document.getElementById('asteroidName');
         const diameterElement = document.getElementById('asteroidDiameter');
         const speedElement = document.getElementById('asteroidSpeed');
@@ -54,12 +51,10 @@ class GlobeApp {
         if (diameterElement) diameterElement.textContent = '-';
         if (speedElement) speedElement.textContent = '-';
         
-        // Show the info panel
         const infoPanel = document.getElementById('asteroidInfo');
         if (infoPanel) {
             infoPanel.style.display = 'block';
             
-            // Add configure prompt
             const configurePrompt = document.createElement('div');
             configurePrompt.id = 'configurePrompt';
             configurePrompt.innerHTML = `
@@ -457,22 +452,61 @@ class GlobeApp {
             
             // Check collision with Earth surface
             const distanceFromCenter = asteroid.position.length();
-            if (distanceFromCenter <= 2.1) {
+            if (distanceFromCenter <= 4) {
                 // Ensure impact happens exactly at target point
                 const targetPoint = asteroid.userData.targetPoint;
                 if (targetPoint) {
-                    // Move asteroid to exact target position for precise impact
-                    asteroid.position.copy(targetPoint);
+                    // Check if we're already animating to target
+                    if (!asteroid.userData.isAnimatingToTarget) {
+                        console.log('🎬 Starting animation at distance:', distanceFromCenter);
+                        // Start smooth movement animation to target
+                        asteroid.userData.isAnimatingToTarget = true;
+                        asteroid.userData.animationStartTime = Date.now();
+                        asteroid.userData.animationDuration = 5000; // 5 seconds
+                        asteroid.userData.startPosition = asteroid.position.clone();
+                        asteroid.userData.targetPosition = targetPoint.clone();
+                        
+                    } else {
+                        // Continue smooth animation
+                        const elapsed = Date.now() - asteroid.userData.animationStartTime;
+                        const progress = Math.min(elapsed / asteroid.userData.animationDuration, 1);
+                        
+                        // Debug progress every 20% to see if animation is working
+                        if (Math.floor(progress * 5) !== Math.floor((progress - 0.001) * 5)) {
+                            console.log(`🎬 Animation progress: ${Math.floor(progress * 100)}%`);
+                        }
+                        
+                        
+                        // Use easing function for smooth movement
+                        const easedProgress = this.easeInOutCubic(progress);
+                        
+                        // Interpolate position
+                        asteroid.position.lerpVectors(
+                            asteroid.userData.startPosition,
+                            asteroid.userData.targetPosition,
+                            easedProgress
+                        );
+                        
+                        // Check if animation is complete (use >= 0.8 since it gets stuck at 80%)
+                        if (progress >= 0.8) {
+                            console.log('🎬 Animation complete - calling handleImpact');
+                            this.handleImpact(asteroid, i);
+                        }
+                    }
+                } else {
+                    // Fallback to instant impact if no target
+                    console.log('💥 Impact detected!');
+                    console.log('📍 Impact position:', asteroid.position);
+                    console.log('📏 Distance from center:', asteroid.position.length());
+                    this.handleImpact(asteroid, i);
                 }
-                
-                console.log('💥 Impact detected!');
-                console.log('📍 Impact position:', asteroid.position);
-                console.log('📏 Distance from center:', asteroid.position.length());
-                console.log('🎯 Target was:', targetPoint);
-                console.log('✅ Impact at exact target point!');
-                this.handleImpact(asteroid, i);
             }
         }
+    }
+    
+    easeInOutCubic(t) {
+        // Smooth easing function for natural movement
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
     
     updateAsteroidTrail(asteroid) {
@@ -528,6 +562,15 @@ class GlobeApp {
     }
     
     handleImpact(asteroid, index) {
+        console.log('🔥 IMPACT TRIGGERED!');
+        // Show impact marker circle (the original impact circle)
+        if (this.controlsManager && this.controlsManager.showImpactMarker) {
+            console.log('🎯 Calling showImpactMarker');
+            this.controlsManager.showImpactMarker(asteroid.position);
+        } else {
+            console.log('❌ controlsManager or showImpactMarker not available');
+        }
+        
         // Create realistic explosion effect
         this.createRealisticExplosion(asteroid.position);
         
@@ -550,7 +593,7 @@ class GlobeApp {
         // Main explosion sphere
         const explosionGroup = new THREE.Group();
         
-        // Core explosion
+        // Core explosion - smaller and more appropriate
         const coreGeometry = new THREE.SphereGeometry(0.1, 16, 12);
         const coreMaterial = new THREE.MeshBasicMaterial({
             color: 0xff4400,
@@ -560,8 +603,8 @@ class GlobeApp {
         const core = new THREE.Mesh(coreGeometry, coreMaterial);
         explosionGroup.add(core);
         
-        // Outer shockwave
-        const shockwaveGeometry = new THREE.SphereGeometry(0.2, 16, 12);
+        // Outer shockwave - smaller
+        const shockwaveGeometry = new THREE.SphereGeometry(0.15, 16, 12);
         const shockwaveMaterial = new THREE.MeshBasicMaterial({
             color: 0xffaa00,
             transparent: true,
@@ -571,8 +614,8 @@ class GlobeApp {
         const shockwave = new THREE.Mesh(shockwaveGeometry, shockwaveMaterial);
         explosionGroup.add(shockwave);
         
-        // Fireball
-        const fireballGeometry = new THREE.SphereGeometry(0.15, 12, 8);
+        // Fireball - smaller
+        const fireballGeometry = new THREE.SphereGeometry(0.12, 12, 8);
         const fireballMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
@@ -587,15 +630,15 @@ class GlobeApp {
         // Animate explosion
         this.animateExplosion(explosionGroup);
         
-        // Remove after 3 seconds
+        // Remove after 5 seconds
         setTimeout(() => {
             this.sceneManager.getScene().remove(explosionGroup);
-        }, 3000);
+        }, 5000);
     }
     
     animateExplosion(explosionGroup) {
         const startTime = Date.now();
-        const duration = 3000;
+        const duration = 5000; // Match the removal timeout
         
         const animate = () => {
             const elapsed = Date.now() - startTime;
@@ -603,8 +646,8 @@ class GlobeApp {
             
             if (progress >= 1) return;
             
-            // Scale explosion
-            const scale = 1 + progress * 4;
+            // Scale explosion moderately
+            const scale = 1 + progress * 3; // Scale up to 4x original size
             explosionGroup.scale.setScalar(scale);
             
             // Fade out
