@@ -1,0 +1,351 @@
+/* Asteroid Impact 2D Visualizer Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a1a;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+#map {
+    flex: 1;
+    height: 100vh;
+}
+
+.controls-panel {
+    width: 350px;
+    background: #2a2a2a;
+    padding: 20px;
+    overflow-y: auto;
+    border-left: 1px solid #444;
+}
+
+.panel-section {
+    margin-bottom: 25px;
+}
+
+.panel-section h3 {
+    color: #ff6b35;
+    margin-bottom: 15px;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.layer-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #333;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.layer-control:hover {
+    background: #3a3a3a;
+}
+
+.layer-control input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.layer-control label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.color-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-left: 10px;
+    border: 2px solid #555;
+}
+
+.scenario-selector {
+    margin-bottom: 20px;
+}
+
+.scenario-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.scenario-btn:hover {
+    background: #555;
+}
+
+.scenario-btn.active {
+    background: #ff6b35;
+}
+
+.info-panel {
+    background: #333;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.info-panel h4 {
+    color: #ff6b35;
+    margin-bottom: 8px;
+}
+
+.legend {
+    margin-top: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+/* Custom Leaflet popup styling */
+.leaflet-popup-content-wrapper {
+    background: #2a2a2a;
+    color: white;
+    border-radius: 4px;
+}
+
+.leaflet-popup-content {
+    margin: 12px;
+    font-size: 13px;
+}
+
+.leaflet-popup-tip {
+    background: #2a2a2a;
+}
+
+/* Timeline Controller Styles */
+.timeline-section {
+    margin-bottom: 25px;
+    background: #333;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.timeline-track {
+    position: relative;
+    height: 40px;
+    background: linear-gradient(90deg, #444 0%, #666 50%, #444 100%);
+    border-radius: 20px;
+    margin: 15px 0;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b35, #ff8c42);
+    border-radius: 20px;
+    width: 0%;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+}
+
+.timeline-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ff6b35;
+}
+
+.timeline-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    gap: 8px;
+}
+
+.timeline-btn {
+    background: #ff6b35;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.timeline-btn:hover {
+    background: #ff8c42;
+    transform: translateY(-1px);
+}
+
+.timeline-btn.secondary {
+    background: #666;
+}
+
+.timeline-btn.secondary:hover {
+    background: #777;
+}
+
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+.speed-slider {
+    flex: 1;
+    height: 4px;
+    background: #555;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #ff6b35;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.current-time {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ff6b35;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.timeline-markers {
+    position: relative;
+    height: 20px;
+    margin: 8px 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: #ff6b35;
+    transform: translateX(-0.5px);
+}
+
+.timeline-marker::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: #ff6b35;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Real-time data panel styles */
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #444;
+}
+
+.data-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.data-label {
+    font-size: 11px;
+    color: #cccccc;
+    font-weight: 500;
+}
+
+.data-value {
+    font-size: 11px;
+    color: #ff6b35;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.data-value.critical {
+    color: #ff0000;
+    animation: pulse-red 1s ease-in-out infinite;
+}
+
+.data-value.warning {
+    color: #ffa500;
+}
+
+.data-value.good {
+    color: #90ee90;
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}

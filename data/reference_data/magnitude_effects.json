@@ -1,0 +1,27 @@
+{
+  "6.0-6.5": {
+    "description": "Strong Earthquake",
+    "felt_radius_km": 250,
+    "damage_radius_km": 50
+  },
+  "6.5-7.0": {
+    "description": "Major Earthquake",
+    "felt_radius_km": 400,
+    "damage_radius_km": 100
+  },
+  "7.0-7.5": {
+    "description": "Major Earthquake",
+    "felt_radius_km": 600,
+    "damage_radius_km": 150
+  },
+  "7.5-8.0": {
+    "description": "Great Earthquake",
+    "felt_radius_km": 800,
+    "damage_radius_km": 250
+  },
+  "8.0+": {
+    "description": "Great Earthquake",
+    "felt_radius_km": 1200,
+    "damage_radius_km": 400
+  }
+}
