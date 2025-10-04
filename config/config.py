@@ -6,7 +6,7 @@ Supports different environments with validation using Pydantic.
 import os
 import logging
 from typing import Optional, Literal
-from pydantic import validator, Field
+from pydantic import field_validator, Field
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
@@ -53,7 +53,7 @@ class BaseConfig(BaseSettings):
         env_file = ".env"
         case_sensitive = True
     
-    @validator("LOG_LEVEL")
+    @field_validator("LOG_LEVEL")
     def validate_log_level(cls, v):
         """Validate log level is a valid logging level."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -61,7 +61,7 @@ class BaseConfig(BaseSettings):
             raise ValueError(f"LOG_LEVEL must be one of {valid_levels}")
         return v.upper()
     
-    @validator("LOG_FILE")
+    @field_validator("LOG_FILE")
     def validate_log_file(cls, v):
         """Ensure log file directory exists."""
         if v:
@@ -107,14 +107,14 @@ class ProductionConfig(BaseConfig):
     # Production-specific settings
     FLASK_ENV: Literal["development", "testing", "production"] = "production"
     
-    @validator("SECRET_KEY")
+    @field_validator("SECRET_KEY")
     def validate_secret_key_in_production(cls, v):
         """Ensure secret key is properly set in production."""
         if len(v) < 32:
             raise ValueError("SECRET_KEY must be at least 32 characters in production")
         return v
     
-    @validator("NASA_NEO_API_KEY")
+    @field_validator("NASA_NEO_API_KEY")
     def validate_nasa_api_key_in_production(cls, v):
         """Ensure NASA API key is set in production."""
         if not v:
